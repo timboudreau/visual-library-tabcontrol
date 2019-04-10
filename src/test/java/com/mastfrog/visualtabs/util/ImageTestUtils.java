@@ -43,7 +43,7 @@ import org.openide.util.Exceptions;
  */
 public final class ImageTestUtils {
 
-    private static boolean visualAssert = true;
+    private static boolean visualAssert = false;
 //            && (Boolean.getBoolean("visualAssert")
 //            && !Boolean.getBoolean("java.awt.headless"));
 

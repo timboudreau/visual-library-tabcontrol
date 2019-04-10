@@ -20,7 +20,6 @@ package com.mastfrog.visualtabs.util;
 
 import static com.mastfrog.visualtabs.util.ImageTestUtils.assertImages;
 import static com.mastfrog.visualtabs.util.ImageTestUtils.newImage;
-import static com.mastfrog.visualtabs.util.ImageTestUtils.showImage;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
@@ -43,7 +42,7 @@ public class ScalingTest {
     @BeforeEach
     public void setup() {
         gradients = new Gradients();
-        gradients.onImageCreate = showImage();
+//        gradients.onImageCreate = showImage();
     }
 
     @Test

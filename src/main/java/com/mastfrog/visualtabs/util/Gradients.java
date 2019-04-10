@@ -46,8 +46,8 @@ import java.util.function.Supplier;
  * image can be used for any compatible gradient (i.e. if you want a radial
  * gradient, and use multiple quadrants of it at different times, only one image
  * is ever created and cached; same with vertical and horizontal gradients at
- * different positions with the same colors and dimension in the direction of the
- * gradient).
+ * different positions with the same colors and dimension in the direction of
+ * the gradient).
  * <p>
  * That sort of caching can also be done in a custom Paint implementation, and
  * when developing this that was tested too. In a non-micro benchmark which
@@ -58,8 +58,8 @@ import java.util.function.Supplier;
  * 40x faster than the Paint implementation..
  * </p>
  * <p>
- * The gradient painters returned here can be used pretty much the same way
- * as the associated gradient paints; you need to pass a Graphics parameter when
+ * The gradient painters returned here can be used pretty much the same way as
+ * the associated gradient paints; you need to pass a Graphics parameter when
  * creating one, since caching is done based on graphics device and transform
  * scale, so that different device scaling doesn't result in windows which paint
  * strangely when dragged to a different monitor.
@@ -164,10 +164,9 @@ public class Gradients {
     }
 
     /**
-     * Create a linear gradient painter.  If the gradient is neither
-     * horizontal nor vertical, an uncached painter which simply creates and
-     * fills a GradientPaint is used, in which case there is no benefit from
-     * caching.
+     * Create a linear gradient painter. If the gradient is neither horizontal
+     * nor vertical, an uncached painter which simply creates and fills a
+     * GradientPaint is used, in which case there is no benefit from caching.
      *
      * @param g The graphics context, to cache by graphics device
      * @param x1 The starting x coordinate
@@ -234,20 +233,24 @@ public class Gradients {
         return Transparency.TRANSLUCENT;
     }
 
+    private static boolean SCALING_SUPPORT = false;
+
     private BufferedImage createLinearGradientImage(Graphics2D g, int x1, int y1, Color top, int x2, int y2, Color bottom) {
         return GradientKey.normalize(x1, y1, top, x2, y2, bottom, (nx1, ny1, nTop, nx2, ny2, nBottom, normed) -> {
-//            AffineTransform xform = g.getTransform();
-//            boolean scaling = xform.getScaleX() != 1 || xform.getScaleY() != 1;
-//            if (scaling) {
-//                double max = Math.max(xform.getScaleX(), xform.getScaleY());
-////                get the distance
-//                double xdist = max * (nx2 - nx1);
-//                double ydist = max * (ny2 - ny1);
-//                System.out.println("Scale width to " + xdist + " from " + (nx2 - nx1));
-//                System.out.println("Scale height to " + ydist + " from " + (ny2 - ny1));
-//                nx2 = (int) (nx1 + xdist);
-//                ny2 = (int) (ny1 + ydist);
-//            }
+            if (SCALING_SUPPORT) {
+                AffineTransform xform = g.getTransform();
+                boolean scaling = xform.getScaleX() != 1 || xform.getScaleY() != 1;
+                if (scaling) {
+                    double max = Math.max(xform.getScaleX(), xform.getScaleY());
+//                get the distance
+                    double xdist = max * (nx2 - nx1);
+                    double ydist = max * (ny2 - ny1);
+                    System.out.println("Scale width to " + xdist + " from " + (nx2 - nx1));
+                    System.out.println("Scale height to " + ydist + " from " + (ny2 - ny1));
+                    nx2 = (int) (nx1 + xdist);
+                    ny2 = (int) (ny1 + ydist);
+                }
+            }
 
             int w, h;
             if (nx1 == nx2) {
@@ -295,12 +298,14 @@ public class Gradients {
         @Override
         public void fill(Graphics2D g, Rectangle bounds) {
             AffineTransform xform = AffineTransform.getTranslateInstance(bounds.x, bounds.y);
-//            if (invertTransform != GradientUtils.NO_XFORM) {
-//                xform.concatenate(invertTransform);
-//                System.out.println("oldbounds " + bounds);
-//                bounds = invertTransform.createTransformedShape(bounds).getBounds();
-//                System.out.println("newbounds " + bounds);
-//            }
+            if (SCALING_SUPPORT) {
+                if (invertTransform != GradientUtils.NO_XFORM) {
+                    xform.concatenate(invertTransform);
+                    System.out.println("oldbounds " + bounds);
+                    bounds = invertTransform.createTransformedShape(bounds).getBounds();
+                    System.out.println("newbounds " + bounds);
+                }
+            }
             BufferedImage bi = img;
             int imageX = bounds.x - x;
             int imageY = bounds.y - y;
@@ -334,7 +339,7 @@ public class Gradients {
         final boolean vertical;
         final Color before;
         final Color after;
-        final AffineTransform invertTransform;
+        final AffineTransform inverseTransform;
 
         public LinearGradientPainter(BufferedImage img, int x, int y, boolean vertical, Color before, Color after, AffineTransform invertTransform) {
             this.img = img;
@@ -343,24 +348,50 @@ public class Gradients {
             this.vertical = vertical;
             this.before = before;
             this.after = after;
-            this.invertTransform = invertTransform;
+            this.inverseTransform = invertTransform;
         }
 
         @Override
         public String toString() {
-            return (vertical ? "Vert{" : "Horiz{") +
-                    "{" + x + "," + y + " before=" + before
+            return (vertical ? "Vert{" : "Horiz{")
+                    + "{" + x + "," + y + " before=" + before
                     + " after=" + after
                     + ", imgSize=" + img.getWidth() + "," + img.getHeight() + "}";
         }
 
         @Override
         public void fill(Graphics2D g, Rectangle bounds) {
+//            AffineTransform origTransform = g.getTransform();
             boolean verticalTiling = !this.vertical;
             bounds = new Rectangle(bounds);
-            if (invertTransform != GradientUtils.NO_XFORM) {
-//                AffineTransform b = AffineTransform.getScaleInstance(1D / invertTransform.getScaleX(), 1D / invertTransform.getScaleY());
-//                bounds = b.createTransformedShape(bounds).getBounds();
+            int x = this.x;
+            int y = this.y;
+            BufferedImage bi = img;
+            int imageX = Math.max(0, bounds.x - x); // questionable
+            int imageY = Math.max(0, bounds.y - y);
+            int imageW = Math.min(bounds.width, bi.getWidth() - imageX);
+            int imageH = Math.min(bounds.height, bi.getHeight() - imageY);
+
+            double scaleX = 1;
+            double scaleY = 1;
+            if (SCALING_SUPPORT) {
+                if (inverseTransform != GradientUtils.NO_XFORM) {
+                    scaleX = inverseTransform.getScaleX();
+                    scaleY = inverseTransform.getScaleY();
+                    g.transform(inverseTransform);
+                    g.translate(x, y);
+//                AffineTransform b = inverseTransform;
+//                System.out.println("orig bounds " + bounds);
+//                bounds = inverseTransform.createTransformedShape(bounds).getBounds();
+//                System.out.println("Invert transform to " + bounds);
+                    x *= scaleX;
+                    y *= scaleY;
+//                imageX *= inverseTransform.getScaleX();
+//                imageY *= inverseTransform.getScaleY();
+//                imageW *= inverseTransform.getScaleX();
+//                imageH *= inverseTransform.getScaleY();
+//                System.out.println("Points from " + this.x + ", " + this.y + " to " + x + ", " + y);
+                }
             }
             if (bounds.x < x) {
                 if (verticalTiling) {
@@ -379,13 +410,7 @@ public class Gradients {
                 }
             }
 
-            BufferedImage bi = img;
-            int imageX = Math.max(0, bounds.x - x); // questionable
-            int imageY = Math.max(0, bounds.y - y);
-            int imageW = Math.min(bounds.width, bi.getWidth() - imageX);
-            int imageH = Math.min(bounds.height, bi.getHeight() - imageY);
-
-            if (bounds.width > bi.getWidth()) {
+            if (bounds.width > bi.getWidth() * scaleX) {
                 if (!verticalTiling) {
                     g.setColor(after);
                     int imageBottom = bounds.y + bi.getHeight();
@@ -393,7 +418,7 @@ public class Gradients {
                     g.fillRect(bounds.x, imageBottom, bounds.width, fillHeight);
                 }
             }
-            if (bounds.height > bi.getHeight()) {
+            if (bounds.height > bi.getHeight() * scaleY) {
                 if (verticalTiling) {
                     int imageRight = bounds.x + bi.getWidth();
                     int fillWidth = (bounds.x + bounds.width) - imageRight;
@@ -402,13 +427,12 @@ public class Gradients {
                 }
             }
 
-            if (imageX >= bi.getWidth() || imageY >= bi.getHeight() || imageX < 0 || imageY < 0 || imageH <= 0 || imageW <= 0) {
+            if (imageX >= bi.getWidth() * scaleX || imageY >= bi.getHeight() * scaleY || imageX < 0 || imageY < 0 || imageH <= 0 || imageW <= 0) {
                 // Fill was everything, we aren't painting within the bounds the
                 // gradient would fill
                 return;
             }
 
-            // XXX could use shear affine transform instead of subimages
             if (imageX != 0 || imageY != 0 || imageW != img.getWidth() || imageH != img.getHeight()) {
                 // Get just the subset of the image we can use
                 try {
@@ -428,13 +452,15 @@ public class Gradients {
                 AffineTransform xform = verticalTiling
                         ? AffineTransform.getTranslateInstance(bounds.x, position)
                         : AffineTransform.getTranslateInstance(position, bounds.y);
-//                if (invertTransform != GradientUtils.NO_XFORM) {
-//                    xform.concatenate(invertTransform);
-//                }
+                if (SCALING_SUPPORT) {
+                    if (inverseTransform != GradientUtils.NO_XFORM) {
+                        xform.concatenate(inverseTransform);
+                    }
+                }
 
                 // See if we are going to tile past the rectangle bounds,
                 // and trim the image if need be
-                int imageDim = verticalTiling ? bi.getHeight() : bi.getWidth();
+                int imageDim = (int) (verticalTiling ? bi.getHeight() * scaleX : bi.getWidth() * scaleY);
                 if (position + imageDim > max) {
                     // last round - snip off any of the image we don't want to
                     // paint, which would go outside the rectangle
@@ -444,8 +470,9 @@ public class Gradients {
                             : bi.getSubimage(0, 0, bi.getWidth() - diff, bi.getHeight());
                 }
                 g.drawRenderedImage(bi, xform);
-                position += verticalTiling ? bi.getHeight() : bi.getWidth();
+                position += verticalTiling ? bi.getHeight() * scaleY : bi.getWidth() * scaleX;
             }
+//            g.setTransform(origTransform);
         }
     }
 
@@ -487,6 +514,7 @@ public class Gradients {
     }
 
     static class ColorPainter implements GradientPainter {
+
         private final Color color;
 
         public ColorPainter(Color color) {
