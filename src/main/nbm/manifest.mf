@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: com.mastfrog.visualtabs
+OpenIDE-Module-Localizing-Bundle: com/mastfrog/visualtabs/Bundle.properties
+OpenIDE-Module-Install: com/mastfrog/visualtabs/Module.class
+AutoUpdate-Show-In-Client: true
+
