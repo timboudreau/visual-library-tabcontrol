@@ -7,10 +7,10 @@
     <packaging>nbm</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>9</maven.compiler.source>
-        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <netbeans.version>RELEASE82</netbeans.version>
-        <!--<netbeans.version>RELEASE110-dev</netbeans.version>-->
+        <!--<netbeans.version>RELEASE110</netbeans.version>-->
     </properties>
     <dependencies>
         <dependency>
@@ -102,6 +102,19 @@
             <id>timboudreau-builds</id>
             <name>timboudreau.com builds</name>
             <url>https://timboudreau.com/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>orgapachenetbeans-1013</id>
+            <name>Apache NetBeans 10.13</name>
+            <url>https://repository.apache.org/content/repositories/orgapachenetbeans-1013/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>
