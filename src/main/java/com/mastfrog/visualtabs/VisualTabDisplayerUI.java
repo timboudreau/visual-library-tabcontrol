@@ -21,6 +21,8 @@ package com.mastfrog.visualtabs;
 import com.mastfrog.visualtabs.util.Colors;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -42,6 +44,7 @@ import java.util.EventObject;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultSingleSelectionModel;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
@@ -80,7 +83,7 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
 
     @Override
     public Dimension getMinimumSize(JComponent c) {
-        return new Dimension(0,0);
+        return new Dimension(0, 0);
     }
 
     public static ComponentUI createUI(JComponent comp) {
@@ -98,6 +101,10 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         return appearance;
     }
 
+    void ensureSomethingVisible() {
+        scene.ensureSomethingVisible();
+    }
+
     @Override
     public void uninstallUI(JComponent c) {
         super.uninstallUI(c);
@@ -111,7 +118,7 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         TabDisplayer disp = (TabDisplayer) c;
         scene = new TabScene(appearance(), disp.getModel(), disp.getSelectionModel());
 //        scene.setZoomFactor(2);
-        
+
         disp.setLayout(new BorderLayout());
         disp.add(scene.createView(), BorderLayout.CENTER);
         disp.setBorder(BorderFactory.createEmptyBorder());
@@ -317,6 +324,7 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         result.setBackground(Color.GRAY);
         return result;
     }
+
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
 
 //        System.setProperty("nb.forceui", "Aqua");
@@ -325,7 +333,6 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
 //        org.netbeans.swing.plaf.Startup.run(javax.swing.plaf.nimbus.NimbusLookAndFeel.class, 21, null);
 //        org.netbeans.swing.plaf.Startup.run(com.sun.java.swing.plaf.motif.MotifLookAndFeel.class, 18, null);
 //        org.netbeans.swing.plaf.Startup.run(javax.swing.plaf.metal.MetalLookAndFeel.class, 18, null);
-
         UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VisualTabDisplayerUI.class.getName());
         EventQueue.invokeLater(() -> {
 
@@ -337,6 +344,19 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
             mdl.addTab(1, new TabData(lbl("d"), icon, "Gog.java", "Snorks"));
             mdl.addTab(1, new TabData(lbl("e"), icon, "Hoodlebort.java", "Snorks"));
             mdl.addTab(1, new TabData(lbl("f"), icon, "Squixt.java", "Snorks"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Skoog.java", "Skoog"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Slixt.java", "Slixt"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Wybble.java", "Wybble"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Glonk.java", "Glonk"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Fafs.java", "Fafs"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Slixt.java", "Sqksk"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Wybble.java", "Wybble"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Glaggagoop.java", "Glaggagoop"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Snikters.java", "Snikters"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Gukker.java", "Gukker"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Quixt.java", "Quixt"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Glorg.java", "Glorg"));
+            mdl.addTab(1, new TabData(lbl("t"), icon, "Snazzle.java", "Snazzle"));
 
             TabbedContainer disp = new TabbedContainer(mdl, TabDisplayer.TYPE_EDITOR);
 
@@ -351,11 +371,41 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
             jf.add(disp, BorderLayout.NORTH);
             jf.add(jp, BorderLayout.CENTER);
 
+            JButton b = new JButton("Delete some stuff");
+            b.addActionListener(ae -> {
+                int total = Math.min(5, mdl.size() / 2);
+                int[] tabs = new int[total];
+                for (int i = 0; i < total; i++) {
+                    tabs[i] = i;
+                }
+                mdl.removeTabs(tabs);
+                TabDisplayer td = findDisplayer(disp);
+                VisualTabDisplayerUI ui = (VisualTabDisplayerUI) td.getUI();
+                System.out.println("UI " + ui);
+                ui.ensureSomethingVisible();
+            });
+            jp.add(b);
+
             jf.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
             jf.setBounds(200, 200, 500, 300);
             jf.setVisible(true);
             Colors.listUIManager();
         });
+    }
+
+    private static TabDisplayer findDisplayer(Container c) {
+        if (c instanceof TabDisplayer) {
+            return (TabDisplayer) c;
+        }
+        for (Component c1 : c.getComponents()) {
+            if (c1 instanceof Container) {
+                TabDisplayer result = findDisplayer((Container) c1);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
     }
 }

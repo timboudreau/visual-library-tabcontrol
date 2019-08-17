@@ -47,7 +47,7 @@ class GlowWidget extends Widget {
         if (r == null || r.width == 0 || r.height == 0 || !isVisible()) {
             return;
         }
-        RectangularGlow glow = new RectangularGlow(appearance);
+        RectangularGlow glow = appearance.glow();
         glow.fill(g, r);
     }
 

@@ -18,6 +18,7 @@
  */
 package com.mastfrog.visualtabs.util;
 
+import com.mastfrog.visualtabs.util.Gradients.DiagonalGradientPainter;
 import static com.mastfrog.visualtabs.util.ImageTestUtils.assertImages;
 import static com.mastfrog.visualtabs.util.ImageTestUtils.newImage;
 import static com.mastfrog.visualtabs.util.ImageTestUtils.sub;
@@ -28,6 +29,8 @@ import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +50,43 @@ public class GradientsTest {
     public void setup() {
         gradients = new Gradients();
 //        gradients.onImageCreate = showImage();
+    }
+
+    @Test
+    public void testNonCacheable() throws Throwable {
+        BufferedImage expected = newImage(80, 80, g -> {
+            DiagonalGradientPainter gp = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, COLOR_B);
+            GradientUtils.prepareGraphics(g);
+            gp.fill(g, new Rectangle(10, 15, 20, 20));
+            DiagonalGradientPainter gp2 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, COLOR_B);
+            assertEquals(gp, gp2);
+            assertSame(gp, gp2);
+
+            DiagonalGradientPainter gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, Color.BLACK);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 11, 10, COLOR_A, 20, 20, COLOR_B);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 11, COLOR_A, 20, 20, COLOR_B);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_B, 20, 20, Color.BLACK);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 21, 20, COLOR_B);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 21, COLOR_B);
+            assertNotEquals(gp, gp3);
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 20, 20, COLOR_B, 10, 15, COLOR_A);
+            assertNotEquals(gp, gp3);
+
+            gp2 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, COLOR_B);
+            assertSame(gp, gp2);
+
+            for (int i = 0; i < Gradients.MAX_CACHED + 1; i++) {
+                gradients.linear(g, 15 + i, 10, Color.ORANGE, 20, 20 + i, Color.BLUE );
+            }
+            gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, COLOR_B);
+            assertEquals(gp, gp3);
+            assertNotSame(gp, gp3);
+        });
     }
 
     @Test

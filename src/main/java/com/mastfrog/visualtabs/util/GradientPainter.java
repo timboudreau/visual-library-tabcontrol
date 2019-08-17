@@ -18,13 +18,15 @@
  */
 package com.mastfrog.visualtabs.util;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
 /**
- * Paints a gradient or similar, which may be cached as a BufferedImage
- * for performance.
+ * Paints a gradient or similar, which may be cached as a BufferedImage for
+ * performance.
  *
  * @author Tim Boudreau
  */
@@ -43,4 +45,55 @@ public interface GradientPainter {
         g.setClip(oldClip);
     }
 
+    default GradientPainter and(GradientPainter next) {
+        return new GradientPainter() {
+            @Override
+            public void fill(Graphics2D g, Rectangle bounds) {
+                GradientPainter.this.fill(g, bounds);
+                next.fill(g, bounds);
+            }
+
+            @Override
+            public void fillShape(Graphics2D g, Shape shape) {
+                GradientPainter.this.fillShape(g, shape);
+                next.fillShape(g, shape);
+            }
+        };
+    }
+
+    default GradientPainter withComposite(AlphaComposite composite) {
+        return new GradientPainter() {
+
+            private void withComposite(Graphics2D g, Runnable r) {
+                Composite old = g.getComposite();
+                g.setComposite(composite);
+                try {
+                    r.run();
+                } finally {
+                    g.setComposite(old);
+                }
+            }
+
+            @Override
+            public void fill(Graphics2D g, Rectangle bounds) {
+                withComposite(g, () -> {
+                    GradientPainter.this.fill(g, bounds);
+                });
+            }
+
+            @Override
+            public void fill(Graphics2D g, int x, int y, int w, int h) {
+                withComposite(g, () -> {
+                    GradientPainter.this.fill(g, x, y, w, h);
+                });
+            }
+
+            @Override
+            public void fillShape(Graphics2D g, Shape shape) {
+                withComposite(g, () -> {
+                    GradientPainter.this.fillShape(g, shape);
+                });
+            }
+        };
+    }
 }

@@ -24,6 +24,7 @@ import com.mastfrog.visualtabs.util.Colors;
 import com.mastfrog.visualtabs.util.Colors.UIColorSupplier;
 import com.mastfrog.visualtabs.util.Gradients;
 import com.mastfrog.visualtabs.util.GradientPainter;
+import com.mastfrog.visualtabs.util.RectangularGlow;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -152,6 +153,10 @@ public class TabsAppearance {
 //            .cache();
 
     private Supplier<Color> glowDark = defaultGlowDark;
+
+    public RectangularGlow glow() {
+        return new RectangularGlow(glowDark(), glowLight(), gradients(), glowWidth());
+    }
 
     private static final Color WHITE_FULL_ALPHA = new Color(255, 255, 255, 0);
 
@@ -401,12 +406,12 @@ public class TabsAppearance {
             = Colors.fromUIManager(ltBlue, "TabRenderer.selectedActivatedBackground",
                     "TabbedPane.focus").cache();
     private static final UIColorSupplier buttonOuterHovered = buttonCenterHovered.darkenBy(0.1f).cache();
-    private static final UIColorSupplier buttonOuterPressed 
+    private static final UIColorSupplier buttonOuterPressed
             = Colors.fromUIManager(ltBlue, "TabRenderer.selectedActivatedBackground", "TabbedPane.focus").cache();
     private static final UIColorSupplier buttonCenterPressed = buttonOuterPressed.darkenBy(0.1f).cache();
-    private static final UIColorSupplier buttonOuterDisabled 
+    private static final UIColorSupplier buttonOuterDisabled
             = Colors.fromUIManager(Color.GRAY, "control").brightenBy(0.1f).cache();
-    private static final UIColorSupplier buttonCenterDisabled 
+    private static final UIColorSupplier buttonCenterDisabled
             = buttonOuterPressed.darkenBy(0.15f).cache();
     private static final float defaultSideButtonStrokeWidth = 0.625f;
 

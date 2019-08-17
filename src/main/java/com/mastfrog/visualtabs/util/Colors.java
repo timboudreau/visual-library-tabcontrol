@@ -38,6 +38,10 @@ import javax.swing.UIManager;
  */
 public class Colors {
 
+    private Colors() {
+        throw new AssertionError();
+    }
+
     public static UIColorSupplier fixed(Color color) {
         return new FixedColorSupplier(color);
     }
@@ -228,7 +232,6 @@ public class Colors {
             }
             return false;
         }
-
     }
 
     static final class MostSaturatedOf implements UIColorSupplier, Comparator<Color> {

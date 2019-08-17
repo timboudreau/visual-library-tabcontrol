@@ -26,12 +26,19 @@ import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -70,6 +77,8 @@ import java.util.function.Supplier;
 public class Gradients {
 
     private static final int DEFAULT_DIMENSION = 12;
+    static final int MAX_CACHED = 24;
+    static final int TARGET_CACHED = 16;
 
     Consumer<BufferedImage> onImageCreate; // for tests
 
@@ -79,6 +88,41 @@ public class Gradients {
             = new HashMap<>(3);
     private final Map<String, Map<RadialKey, BufferedImage>> radialImageForKeyForDeviceId
             = new HashMap<>(3);
+    private final Map<NonCacheableKey, DiagonalGradientPainter> diagonalGradients
+            = new HashMap<>(24);
+    private final Map<String, NonCacheableKey> diagonalKeys = new HashMap<>(24);
+
+    private DiagonalGradientPainter nc(int x1, int y1, Color a, int x2, int y2, Color b, boolean cyclic) {
+        // Pending:
+        // Normalize cyclic to minimum > 0 positions, and reverse coords depending on slope to
+        // be able to use the same instance for equivalent coordinates and colors
+        NonCacheableKey key = new NonCacheableKey(x1, x2, y1, y2, a, b, cyclic);
+        NonCacheableKey realKey = diagonalKeys.get(key.toString());
+        if (realKey != null) {
+            key = realKey;
+            key.touch();
+            DiagonalGradientPainter p = diagonalGradients.get(key);
+            if (p != null) {
+                return p;
+            }
+        } else {
+            diagonalKeys.put(key.toString(), key);
+        }
+        DiagonalGradientPainter result = new DiagonalGradientPainter(x1, y1, a, x2, y2, b, cyclic, key);
+        diagonalGradients.put(key, result);
+        // GC our cache - the rasters belonging to GradientPaints are not small
+        if (diagonalGradients.size() > MAX_CACHED) {
+            List<NonCacheableKey> l = new ArrayList<>(diagonalGradients.keySet());
+            Collections.sort(l);
+            Iterator<NonCacheableKey> iter = l.iterator();
+            while (diagonalGradients.size() > TARGET_CACHED && iter.hasNext()) {
+                NonCacheableKey curr = iter.next();
+                diagonalGradients.remove(curr);
+                diagonalKeys.remove(curr.toString());
+            }
+        }
+        return result;
+    }
 
     private Map<GradientKey, BufferedImage> gradientMap(Graphics2D g) {
         String id = devAndTransformId(g);
@@ -183,7 +227,7 @@ public class Gradients {
         }
         GradientKey key = GradientKey.forGradientSpec(x1, y1, top, x2, y2, bottom);
         if (key == null) {
-            return new NonCacheableGradientPainter(x1, y1, top, x2, y2, bottom);
+            return nc(x1, y1, top, x2, y2, bottom, false);
         }
         BufferedImage img = imageForKey(g, key, () -> {
             return createLinearGradientImage(g, x1, y1, top, x2, y2, bottom);
@@ -291,6 +335,7 @@ public class Gradients {
             this.invertTransform = invertTransform;
         }
 
+        @Override
         public String toString() {
             return "Radial{" + x + "," + y + " fill=" + fillColor + ", imgSize=" + img.getWidth() + "," + img.getHeight() + "}";
         }
@@ -301,9 +346,7 @@ public class Gradients {
             if (SCALING_SUPPORT) {
                 if (invertTransform != GradientUtils.NO_XFORM) {
                     xform.concatenate(invertTransform);
-                    System.out.println("oldbounds " + bounds);
                     bounds = invertTransform.createTransformedShape(bounds).getBounds();
-                    System.out.println("newbounds " + bounds);
                 }
             }
             BufferedImage bi = img;
@@ -476,7 +519,67 @@ public class Gradients {
         }
     }
 
-    private static class NonCacheableGradientPainter implements GradientPainter {
+    static class NonCacheableKey implements Comparable<NonCacheableKey> {
+
+        private final int[] values;
+        private final boolean cyclic;
+        private long touched = System.nanoTime();
+
+        NonCacheableKey(int x1, int x2, int y1, int y2, Color top, Color bottom, boolean cyclic) {
+            this(x1, x2, y1, y2, top.getRGB(), bottom.getRGB(), cyclic);
+        }
+
+        NonCacheableKey(int x1, int x2, int y1, int y2, int top, int bottom, boolean cyclic) {
+            values = new int[]{x1, x2, y1, y2, top, bottom};
+            this.cyclic = cyclic;
+        }
+
+        void touch() {
+            touched = System.nanoTime();
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < values.length; i++) {
+                sb.append(Integer.toHexString(values[i]));
+                if (i != values.length - 1) {
+                    sb.append('-');
+                }
+                sb.append(cyclic ? 'c' : 'n');
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 73 * hash + Arrays.hashCode(this.values) + (cyclic ? 73 : 0);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof NonCacheableKey)) {
+                return false;
+            }
+            final NonCacheableKey other = (NonCacheableKey) obj;
+            return Arrays.equals(this.values, other.values);
+        }
+
+        @Override
+        public int compareTo(NonCacheableKey o) {
+            return Long.compare(touched, o.touched);
+        }
+    }
+
+    static class DiagonalGradientPainter implements GradientPainter {
 
         final int x1;
         final int y1;
@@ -484,32 +587,113 @@ public class Gradients {
         final int x2;
         final int y2;
         final Color bottom;
+        private GradientPaint paint;
+        private final boolean cyclic;
+        private final NonCacheableKey key;
 
-        NonCacheableGradientPainter(int x1, int y1, Color top, int x2, int y2, Color bottom) {
+        DiagonalGradientPainter(int x1, int y1, Color top, int x2, int y2, Color bottom, boolean cyclic, NonCacheableKey key) {
             this.x1 = x1;
             this.y1 = y1;
             this.top = top;
             this.x2 = x2;
             this.y2 = y2;
             this.bottom = bottom;
+            this.cyclic = cyclic;
+            this.key = key;
         }
 
         @Override
         public String toString() {
             return "NonCacheableGradientPainter{" + "x1=" + x1 + ", y1=" + y1
                     + ", top=" + colorToString(top) + ", x2=" + x2 + ", y2="
-                    + y2 + ", bottom=" + colorToString(bottom) + '}';
+                    + y2 + ", bottom=" + colorToString(bottom) + ", cyclic="
+                    + cyclic + '}';
+        }
+
+        private GradientPaint paint() {
+            if (paint != null) {
+                return paint;
+            }
+            return paint = new GradientPaint(x1, y1, top, x2, y2, bottom);
         }
 
         @Override
         public void fill(Graphics2D g, Rectangle bounds) {
             Paint old = g.getPaint();
-            GradientPaint gp = new GradientPaint(x1, y1, top, x2, y2, bottom);
+            GradientPaint gp = paint();
             g.setPaint(gp);
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
             if (old != null) {
                 g.setPaint(old);
             }
+            key.touch();
+        }
+
+        @Override
+        public void fill(Graphics2D g, int x, int y, int w, int h) {
+            Paint old = g.getPaint();
+            GradientPaint gp = paint();
+            g.setPaint(gp);
+            g.fillRect(x, y, w, h);
+            if (old != null) {
+                g.setPaint(old);
+            }
+            key.touch();
+        }
+
+        @Override
+        public void fillShape(Graphics2D g, Shape shape) {
+            Paint old = g.getPaint();
+            GradientPaint gp = new GradientPaint(x1, y1, top, x2, y2, bottom);
+            g.setPaint(gp);
+            g.fill(shape);
+            if (old != null) {
+                g.setPaint(old);
+            }
+            key.touch();
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 37 * hash + this.x1;
+            hash = 37 * hash + this.y1;
+            hash = 37 * hash + Objects.hashCode(this.top);
+            hash = 37 * hash + this.x2;
+            hash = 37 * hash + this.y2;
+            hash = 37 * hash + Objects.hashCode(this.bottom);
+            hash = 37 * hash + (cyclic ? 1 : 0);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final DiagonalGradientPainter other = (DiagonalGradientPainter) obj;
+            if (this.x1 != other.x1) {
+                return false;
+            }
+            if (this.y1 != other.y1) {
+                return false;
+            }
+            if (this.x2 != other.x2) {
+                return false;
+            }
+            if (this.y2 != other.y2) {
+                return false;
+            }
+            if (!Objects.equals(this.top, other.top)) {
+                return false;
+            }
+            return Objects.equals(this.bottom, other.bottom);
         }
     }
 
@@ -522,10 +706,49 @@ public class Gradients {
         }
 
         @Override
+        public String toString() {
+            return "ColorPainter(" + color + ")";
+        }
+
+        @Override
         public void fill(Graphics2D g, Rectangle bounds) {
             g.setColor(color);
             g.fill(bounds);
         }
 
+        @Override
+        public void fillShape(Graphics2D g, Shape shape) {
+            Paint old = g.getPaint();
+            g.setPaint(color);
+            g.fill(shape);
+            if (old != null) {
+                g.setPaint(old);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 13 * hash + Objects.hashCode(this.color);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ColorPainter other = (ColorPainter) obj;
+            if (!Objects.equals(this.color, other.color)) {
+                return false;
+            }
+            return true;
+        }
     }
 }

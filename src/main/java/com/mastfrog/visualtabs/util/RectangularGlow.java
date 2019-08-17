@@ -18,7 +18,6 @@
  */
 package com.mastfrog.visualtabs.util;
 
-import com.mastfrog.visualtabs.TabsAppearance;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -33,10 +32,6 @@ public final class RectangularGlow implements GradientPainter {
     final Color light;
     final Gradients gradients;
     final int glowWidth;
-
-    public RectangularGlow(TabsAppearance appearance) {
-        this(appearance.glowDark(), appearance.glowLight(), appearance.gradients(), appearance.glowWidth());
-    }
 
     public RectangularGlow(Color dark, Color light, Gradients gradients, int glowWidth) {
         this.dark = dark;

@@ -162,16 +162,15 @@ public class TabScene extends Scene {
         setLayout(new TabsAndButtonsLayout());
         tabs.addDependency(buttons::revalidate);
 
-                // We don't do anything with hover here, it just ensures the hover of other
+        // We don't do anything with hover here, it just ensures the hover of other
         // things gets cancelled when the mouse leaves the tabs
-        buttons.getActions().addAction(new WidgetAction.Adapter(){
+        buttons.getActions().addAction(new WidgetAction.Adapter() {
             @Override
             public WidgetAction.State mouseEntered(Widget widget, WidgetMouseEvent event) {
                 hp.onMouseExited();
                 return WidgetAction.State.REJECTED;
             }
         });
-
 
         getSceneAnimator().getPreferredBoundsAnimator().addAnimatorListener(al);
         getSceneAnimator().getPreferredLocationAnimator().addAnimatorListener(al);
@@ -199,6 +198,10 @@ public class TabScene extends Scene {
 //        setZoomFactor(7);
 //        setZoomFactor(4);
 //        setZoomFactor(2);
+    }
+
+    void ensureSomethingVisible() {
+        this.panTray.ensureSomethingIsVisible();
     }
 
     void fullValidate() {

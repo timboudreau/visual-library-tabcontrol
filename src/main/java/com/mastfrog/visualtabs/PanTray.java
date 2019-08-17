@@ -463,6 +463,13 @@ class PanTray extends Widget {
         }
     }
 
+    public void ensureSomethingIsVisible() {
+        int[] minMax = minMax();
+        if (panPosition < minMax[1]) {
+            setPanPosition(minMax[0]);
+        }
+    }
+
     class HoverUpdateNotifier implements AnimatorListener {
 
         boolean triggered;
