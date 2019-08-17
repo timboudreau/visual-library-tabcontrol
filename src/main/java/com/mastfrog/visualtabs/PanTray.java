@@ -156,7 +156,7 @@ class PanTray extends Widget {
         if (r == null) {
             getScene().validate();
             r = getBounds();
-            assert r != null;
+            return new int[] {0, 0};
         }
         if (comp != null) {
             int w = r.width - leftInset;

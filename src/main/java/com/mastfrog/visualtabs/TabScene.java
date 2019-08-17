@@ -84,6 +84,7 @@ import org.netbeans.swing.tabcontrol.TabListPopupAction;
 import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import org.netbeans.swing.tabcontrol.event.TabActionEvent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.RequestProcessor;
 
 /**
  *
@@ -106,6 +107,7 @@ public class TabScene extends Scene {
     private final Widget raggedEdges = new Widget(this);
     private final Widget raggedEdgesLayer = new LayerWidget(this);
     private final ButtonsPanel buttons;
+    private final RequestProcessor.Task task;
 
     private final TabWidgetMapper mapper;
 
@@ -133,6 +135,9 @@ public class TabScene extends Scene {
         int glowWidth = appearance.glowWidth();
         tabsLayer.setPreferredLocation(new Point(0, glowWidth));
         panTray.addChild(tabs);
+        task = RequestProcessor.getDefault().create(() -> {
+            EventQueue.invokeLater(panTray::ensureSomethingIsVisible);
+        });
         tabs.setLayout(new SortedFlowLayout(model, false, LayoutFactory.SerialAlignment.LEFT_TOP, 0, appearance.panTrayLeftInset()));
 
         tabsContainer.addChild(glowLayer);
@@ -201,11 +206,12 @@ public class TabScene extends Scene {
     }
 
     void ensureSomethingVisible() {
-        this.panTray.ensureSomethingIsVisible();
+        task.schedule(750);
     }
 
     void fullValidate() {
         ensureSelectedWidget(getSelectedWidget());
+        ensureSomethingVisible();
         validate();
         repaint();
     }
