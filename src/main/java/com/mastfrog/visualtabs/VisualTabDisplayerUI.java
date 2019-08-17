@@ -385,6 +385,11 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
                 ui.ensureSomethingVisible();
             });
             jp.add(b);
+            b = new JButton("Request att");
+            b.addActionListener(ae -> {
+                disp.requestAttention(0);
+            });
+            jp.add(b);
 
             jf.setDefaultCloseOperation(EXIT_ON_CLOSE);
 

@@ -136,7 +136,7 @@ public class TabScene extends Scene {
         tabsLayer.setPreferredLocation(new Point(0, glowWidth));
         panTray.addChild(tabs);
         task = RequestProcessor.getDefault().create(() -> {
-            EventQueue.invokeLater(panTray::ensureSomethingIsVisible);
+            EventQueue.invokeLater(this::reallyEnsureSomethingVisible);
         });
         tabs.setLayout(new SortedFlowLayout(model, false, LayoutFactory.SerialAlignment.LEFT_TOP, 0, appearance.panTrayLeftInset()));
 
@@ -186,26 +186,21 @@ public class TabScene extends Scene {
                 buttons.right().setEnabled(panTray.canScrollRight());
             });
         });
-
-//        tabsContainer.setBackground(Color.RED);
-//        tabsContainer.setOpaque(true);
-//        panTray.setBackground(Color.YELLOW);
-//        panTray.setOpaque(true);
-//        setBackground(Color.GREEN);
-//        setOpaque(true);
-//        raggedEdges.setBackground(Colors.fixed(Color.ORANGE).withAlpha(64).get());
-//        raggedEdges.setOpaque(true);
-//        tabs.setBackground(Color.PINK);
-//        tabs.setOpaque(true);
-//
-//        tabsContainer.setCheckClipping(true);
-//        panTray.setCheckClipping(true);
-//        setZoomFactor(7);
-//        setZoomFactor(4);
-//        setZoomFactor(2);
     }
 
+    void reallyEnsureSomethingVisible() {
+        Widget w = getSelectedWidget();
+        if (w != null && changesSinceLastEnsure > 2) {
+            panTray.ensureChildVisible(w);
+        } else {
+            panTray.ensureSomethingIsVisible();
+        }
+    }
+
+    private int changesSinceLastEnsure;
+
     void ensureSomethingVisible() {
+        changesSinceLastEnsure++;
         task.schedule(750);
     }
 

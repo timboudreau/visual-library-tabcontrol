@@ -289,8 +289,6 @@ public class Gradients {
 //                get the distance
                     double xdist = max * (nx2 - nx1);
                     double ydist = max * (ny2 - ny1);
-                    System.out.println("Scale width to " + xdist + " from " + (nx2 - nx1));
-                    System.out.println("Scale height to " + ydist + " from " + (ny2 - ny1));
                     nx2 = (int) (nx1 + xdist);
                     ny2 = (int) (ny1 + ydist);
                 }
@@ -745,10 +743,7 @@ public class Gradients {
                 return false;
             }
             final ColorPainter other = (ColorPainter) obj;
-            if (!Objects.equals(this.color, other.color)) {
-                return false;
-            }
-            return true;
+            return Objects.equals(this.color, other.color);
         }
     }
 }

@@ -88,7 +88,6 @@ class PanTray extends Widget {
     private static final int TRIGGER_RAPID_COUNT = 3;
     private static final int RAPID_MULTIPLIER = 17;
 
-
     private void mouseWheelMoved(WidgetAction.WidgetMouseWheelEvent event) {
         long now = System.currentTimeMillis();
         // Wheel numbers are low, so to not have deathly slow scrolling
@@ -156,7 +155,9 @@ class PanTray extends Widget {
         if (r == null) {
             getScene().validate();
             r = getBounds();
-            return new int[] {0, 0};
+            if (r == null) {
+                return new int[]{0, 0};
+            }
         }
         if (comp != null) {
             int w = r.width - leftInset;
@@ -425,6 +426,7 @@ class PanTray extends Widget {
 
     private Widget partiallyVisibleLeftWidget;
     private boolean wasVeryPartial;
+
     private void setPartiallyVisibleLeftWidget(Widget widget, boolean veryPartial) {
         if (partiallyVisibleLeftWidget != widget || (partiallyVisibleLeftWidget == widget && veryPartial != wasVeryPartial)) {
             pvConsumer.setPartiallyVisibleWidget(partiallyVisibleLeftWidget, widget, veryPartial);
@@ -434,6 +436,7 @@ class PanTray extends Widget {
     }
 
     interface PartiallyVisibleWidgetConsumer {
+
         void setPartiallyVisibleWidget(Widget prev, Widget w, boolean veryPartial);
     }
 
@@ -465,7 +468,7 @@ class PanTray extends Widget {
 
     public void ensureSomethingIsVisible() {
         int[] minMax = minMax();
-        if (panPosition < minMax[1]) {
+        if (panPosition < minMax[0]) {
             setPanPosition(minMax[0]);
         }
     }
