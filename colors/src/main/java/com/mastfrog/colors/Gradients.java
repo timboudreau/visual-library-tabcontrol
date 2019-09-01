@@ -62,7 +62,9 @@ import java.util.function.Supplier;
  * two seconds, for many rounds, the BufferedImage approach was 10x faster than
  * the Paint implementation, and also far more predictable - forcing garbage
  * collection between loops resulted in the BufferedImage implementation being
- * 40x faster than the Paint implementation..
+ * 40x faster than the Paint implementation. The bottom line is that modern
+ * graphics pipelines are much more optimized for blitting images than anything
+ * the JDK's paints do internally..
  * </p>
  * <p>
  * The gradient painters returned here can be used pretty much the same way as
@@ -70,6 +72,10 @@ import java.util.function.Supplier;
  * creating one, since caching is done based on graphics device and transform
  * scale, so that different device scaling doesn't result in windows which paint
  * strangely when dragged to a different monitor.
+ * </p>
+ * <p>
+ * Since gradients are cached (lru eviction), you create a Gradients instance to
+ * use for as long as you need it.
  * </p>
  *
  * @author Tim Boudreau
@@ -341,7 +347,7 @@ public class Gradients {
         final Color fillColor;
         final AffineTransform invertTransform;
 
-        public RadialGradientPainter(BufferedImage img, int x, int y, Color fillColor, AffineTransform invertTransform) {
+        RadialGradientPainter(BufferedImage img, int x, int y, Color fillColor, AffineTransform invertTransform) {
             this.img = img;
             this.x = x;
             this.y = y;
@@ -398,7 +404,7 @@ public class Gradients {
         final Color after;
         final AffineTransform inverseTransform;
 
-        public LinearGradientPainter(BufferedImage img, int x, int y, boolean vertical, Color before, Color after, AffineTransform invertTransform) {
+        LinearGradientPainter(BufferedImage img, int x, int y, boolean vertical, Color before, Color after, AffineTransform invertTransform) {
             this.img = img;
             this.x = x;
             this.y = y;
@@ -655,7 +661,7 @@ public class Gradients {
 
         private final Color color;
 
-        public ColorPainter(Color color) {
+        ColorPainter(Color color) {
             this.color = color;
         }
 

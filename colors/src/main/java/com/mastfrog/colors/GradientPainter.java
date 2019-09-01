@@ -23,21 +23,50 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.util.function.DoubleFunction;
 
 /**
  * Paints a gradient or similar, which may be cached as a BufferedImage for
- * performance.
+ * performance; the GradientPaint and similar interfaces in the JDK allocate
+ * large pixel buffers; for linear and radial gradients, a single cached image
+ * can be reused, resulting an considerably better performance (since modern
+ * graphics pipelines are optimized for working with images, not pushing pixels)
+ * and memory footprint.
  *
  * @author Tim Boudreau
  */
 public interface GradientPainter {
 
+    /**
+     * Fill a rectangle with the gradient
+     *
+     * @param g the graphics context
+     * @param bounds The rectangle
+     */
     void fill(Graphics2D g, Rectangle bounds);
 
+    /**
+     * Fill a rectangle with the gradient
+     *
+     * @param g the graphics context
+     * @param x the X coordinate
+     * @param y the Y coordinate
+     * @param w the width
+     * @param h the height
+     * @param bounds The rectangle
+     */
     default void fill(Graphics2D g, int x, int y, int w, int h) {
         fill(g, new Rectangle(x, y, w, h));
     }
 
+    /**
+     * Fill a shape with the gradient. Note that for some implementations this
+     * will be accomplished by setting the Graphics2D's <code>clip</code> to the
+     * shape, which can result in un-antialiased edges.
+     *
+     * @param g A graphics
+     * @param bounds The rectangle
+     */
     default void fillShape(Graphics2D g, Shape shape) {
         Shape oldClip = g.getClip();
         g.setClip(shape);
@@ -45,8 +74,22 @@ public interface GradientPainter {
         g.setClip(oldClip);
     }
 
+    /**
+     * Combine this painter with another one, painting both when calls to fill
+     * or fill the shape are made. Note that the second gradient must use alpha
+     * for this to do anything useful.
+     *
+     * @param next Another gradient painter
+     * @return A gradient painter that wraps both this and the passed one
+     */
     default GradientPainter and(GradientPainter next) {
         return new GradientPainter() {
+            @Override
+            public void fill(Graphics2D g, int x, int y, int w, int h) {
+                GradientPainter.this.fill(g, x, y, w, h);
+                next.fill(g, x, y, w, h);
+            }
+
             @Override
             public void fill(Graphics2D g, Rectangle bounds) {
                 GradientPainter.this.fill(g, bounds);
@@ -61,6 +104,35 @@ public interface GradientPainter {
         };
     }
 
+    /**
+     * For a gradient that fades into place, returns a function which returns a
+     * gradient with varying alpha based on the current step (passed to the
+     * function) of the total steps (passed to this method).
+     *
+     * @param steps The number of steps
+     * @return A function which will produce a GradientPainter of varying alpha
+     * values based on its input
+     */
+    default DoubleFunction<GradientPainter> animateTransparency(float steps) {
+        if (steps == 0D) {
+            throw new IllegalArgumentException("Cannot have 0 steps "
+                    + "- division by zero");
+        }
+        return step -> {
+            double amt = Math.min(1D, Math.max(0D, step / steps));
+            AlphaComposite comp = AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER, (float) amt);
+            return withComposite(comp);
+        };
+    }
+
+    /**
+     * Returns a gradient painter which sets the passed composite on the
+     * graphics before painting with this one.
+     *
+     * @param composite A composite
+     * @return A gradient painter
+     */
     default GradientPainter withComposite(AlphaComposite composite) {
         return new GradientPainter() {
 

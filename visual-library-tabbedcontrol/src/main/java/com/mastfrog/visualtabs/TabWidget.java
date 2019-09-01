@@ -234,7 +234,6 @@ final class TabWidget extends Widget implements Supplier<TabData> {
         Object desktopHints
                 = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
         if (desktopHints instanceof Map<?, ?>) {
-            System.out.println("add hints " + desktopHints);
             result.addRenderingHints((Map<?, ?>) desktopHints);
         }
         return result;

@@ -29,7 +29,7 @@ final class RadialKey {
 
     private final int[] values = new int[4];
 
-    public RadialKey(int radius, Color topColor, Color bottomColor) {
+    RadialKey(int radius, Color topColor, Color bottomColor) {
         values[0] = radius;
         values[1] = topColor.getRGB();
         values[2] = bottomColor.getRGB();

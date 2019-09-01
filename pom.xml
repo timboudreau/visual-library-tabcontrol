@@ -23,7 +23,7 @@ Copyright (C) 2012-2019 Tim Boudreau
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-    <version>0.3.11</version>
+    <version>0.3.12</version>
     <packaging>pom</packaging>
     <name>Visual Library Tabbed Control Parent</name>
     <modules>

@@ -30,11 +30,11 @@ final class LinearKey {
 
     private final int[] values = new int[4];
 
-    public LinearKey(boolean vertical, int dist, Color topColor, Color bottomColor) {
+    LinearKey(boolean vertical, int dist, Color topColor, Color bottomColor) {
         this(vertical, dist, topColor.getRGB(), bottomColor.getRGB());
     }
 
-    public LinearKey(boolean vertical, int dist, int topColor, int bottomColor) {
+    LinearKey(boolean vertical, int dist, int topColor, int bottomColor) {
         this.values[0] = vertical ? -dist : dist;
         this.values[1] = topColor;
         this.values[2] = bottomColor;

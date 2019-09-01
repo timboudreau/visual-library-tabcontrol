@@ -23,6 +23,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
+ * Paints a gradient around the edges of a rectangle, such that the same color
+ * is always on the outer edge.
  *
  * @author Tim Boudreau
  */

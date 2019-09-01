@@ -84,7 +84,7 @@ public class TabsAppearance {
                     .cache();
 
     static final ColorSupplier selectedBase
-            = Colors.mostSaturatedOf(ltBlue2, isDark, dkBlue,
+            = Colors.choiceOf(ltBlue2, isDark, dkBlue,
                     "Table.dropLineShortColor",
                     //                    "TabbedPane.focus",
                     "TabbedPane.borderHightlightColor",
@@ -144,7 +144,7 @@ public class TabsAppearance {
     private static ColorSupplier defaultGlowDark
             = selectedHl.withSaturation(0.475f)
                     .withBrightness(0.95f).cache();
-//            Colors.mostSaturatedOf(
+//            Colors.choiceOf(
 //            new Color(255, 132, 50, 172), "Table.dropLineShortColor", "Tree.selectionBackground",
 //            "TabRenderer.selectedActivatedBackground")
 //            .withSaturation(0.325f)
