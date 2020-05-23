@@ -41,7 +41,7 @@ final class ColorDiffComposite implements Composite, CompositeContext {
     public void dispose() {
         // do nothing
     }
-    int[] WHITE = new int[]{255, 255, 255, 255};
+    int[] WHITE = new int[]{0, 255, 0, 255};
 
     @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {

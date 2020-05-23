@@ -23,7 +23,7 @@ Copyright (C) 2012-2019 Tim Boudreau
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-    <version>0.3.12</version>
+    <version>0.3.14</version>
     <packaging>pom</packaging>
     <name>Visual Library Tabbed Control Parent</name>
     <modules>
@@ -35,7 +35,7 @@ Copyright (C) 2012-2019 Tim Boudreau
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <netbeans.version>RELEASE82</netbeans.version>
-        <junit.version>5.5.1</junit.version>
+        <junit.version>5.6.2</junit.version>
         <darcula.version>2018.2</darcula.version>
     </properties>
     <dependencyManagement>
@@ -156,6 +156,15 @@ Copyright (C) 2012-2019 Tim Boudreau
                         <forkCount>0</forkCount>
                         <trimStackTrace>false</trimStackTrace>
                         <!--<useFile>false</useFile>-->
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <quiet>true</quiet>
+                        <doclint>none</doclint>
                     </configuration>
                 </plugin>
             </plugins>

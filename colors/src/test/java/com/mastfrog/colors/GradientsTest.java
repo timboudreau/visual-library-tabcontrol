@@ -18,10 +18,6 @@
  */
 package com.mastfrog.colors;
 
-import com.mastfrog.colors.LinearKey;
-import com.mastfrog.colors.GradientUtils;
-import com.mastfrog.colors.Gradients;
-import com.mastfrog.colors.GradientPainter;
 import com.mastfrog.colors.Gradients.DiagonalGradientPainter;
 import static com.mastfrog.colors.ImageTestUtils.assertImages;
 import static com.mastfrog.colors.ImageTestUtils.newImage;
@@ -31,6 +27,8 @@ import java.awt.GradientPaint;
 import java.awt.MultipleGradientPaint;
 import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -49,11 +47,12 @@ public class GradientsTest {
     private final Color COLOR_A = new Color(0, 0, 255, 255);
     private final Color COLOR_B = new Color(255, 127, 22, 0);
     Gradients gradients;
+    Shape shape;
 
     @BeforeEach
     public void setup() {
         gradients = new Gradients();
-//        gradients.onImageCreate = showImage();
+        shape = new Ellipse2D.Double(5, 5, 40, 40);
     }
 
     @Test
@@ -85,7 +84,7 @@ public class GradientsTest {
             assertSame(gp, gp2);
 
             for (int i = 0; i < Gradients.MAX_CACHED + 1; i++) {
-                gradients.linear(g, 15 + i, 10, Color.ORANGE, 20, 20 + i, Color.BLUE );
+                gradients.linear(g, 15 + i, 10, Color.ORANGE, 20, 20 + i, Color.BLUE);
             }
             gp3 = (DiagonalGradientPainter) gradients.linear(g, 10, 15, COLOR_A, 20, 20, COLOR_B);
             assertEquals(gp, gp3);
@@ -104,6 +103,34 @@ public class GradientsTest {
         BufferedImage got = newImage(80, 80, g -> {
             GradientPainter rad = gradients.radial(g, 0, 0, COLOR_A, COLOR_B, 10);
             rad.fill(g, 10, 10, 20, 20);
+        });
+        assertImages(expected, got, (a, b) -> {
+            if (a.getAlpha() <= 1 && b.getAlpha() <= 1) {
+                if (!a.equals(b)) {
+//                    System.out.println("SLIGHT DIFFERENCE: "
+//                            + colorToString(a) + " vs " + colorToString(b));
+                }
+                return true;
+            }
+            return a.equals(b);
+        });
+    }
+
+    @Test
+    public void basicTestRadialShape() throws Throwable {
+        if (true) {
+            return;
+        }
+//        ImageTestUtils.enableVisualAssert();
+        BufferedImage expected = newImage(80, 80, g -> {
+            RadialGradientPaint rgp = new RadialGradientPaint(10, 10, 10, new float[]{0, 1}, new Color[]{COLOR_A, COLOR_B}, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+            GradientUtils.prepareGraphics(g);
+            g.setPaint(rgp);
+            g.fill(shape);
+        });
+        BufferedImage got = newImage(80, 80, g -> {
+            GradientPainter rad = gradients.radial(g, 0, 0, COLOR_A, COLOR_B, 10);
+            rad.fillShape(g, shape);
         });
         assertImages(expected, got, (a, b) -> {
             if (a.getAlpha() <= 1 && b.getAlpha() <= 1) {
@@ -163,6 +190,26 @@ public class GradientsTest {
             g.clearRect(0, 0, 80, 80);
             GradientPainter p = gradients.linear(g, 10, 10, COLOR_A, 10, 20, COLOR_B);
             p.fill(g, new Rectangle(10, 10, 50, 50));
+        });
+        assertImages(expected, img);
+    }
+
+    @Test
+    public void basicTestShapeVertical() throws Throwable {
+        if (true) {
+            return;
+        }
+//        ImageTestUtils.enableVisualAssert();
+        BufferedImage expected = newImage(80, 80, g -> {
+            g.clearRect(0, 0, 80, 80);
+            GradientPaint gp = new GradientPaint(10, 10, COLOR_A, 10, 20, COLOR_B, false);
+            g.setPaint(gp);
+            g.fill(shape);
+        });
+        BufferedImage img = newImage(80, 80, g -> {
+            g.clearRect(0, 0, 80, 80);
+            GradientPainter p = gradients.linear(g, 10, 10, COLOR_A, 10, 20, COLOR_B);
+            p.fillShape(g, shape);
         });
         assertImages(expected, img);
     }
@@ -292,6 +339,24 @@ public class GradientsTest {
         BufferedImage img = newImage(80, 80, g -> {
             GradientPainter p = gradients.linear(g, 10, 10, COLOR_A, 20, 10, COLOR_B);
             p.fill(g, new Rectangle(10, 10, 50, 50));
+        });
+        assertImages(expected, img);
+    }
+
+    @Test
+    public void basicTestHorizontalShape() throws Throwable {
+        if (true) {
+            return;
+        }
+//        ImageTestUtils.enableVisualAssert();
+        BufferedImage expected = newImage(80, 80, g -> {
+            GradientPaint gp = new GradientPaint(10, 10, COLOR_A, 20, 10, COLOR_B, false);
+            g.setPaint(gp);
+            g.fill(shape);
+        });
+        BufferedImage img = newImage(80, 80, g -> {
+            GradientPainter p = gradients.linear(g, 10, 10, COLOR_A, 20, 10, COLOR_B);
+            p.fillShape(g, shape);
         });
         assertImages(expected, img);
     }

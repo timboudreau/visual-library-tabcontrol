@@ -154,11 +154,11 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
                 }
             }
             if (target != null) {
-                System.out.println("REMOVED " + target);
+//                System.out.println("REMOVED " + target);
                 disp.removeMouseListener(target);
                 disp.putClientProperty("forwardingMouseListener", target);
                 detach(disp);
-                System.out.println("SUCCESS FOR " + obj.getClass().getName());
+//                System.out.println("SUCCESS FOR " + obj.getClass().getName());
                 return true;
             }
             return false;

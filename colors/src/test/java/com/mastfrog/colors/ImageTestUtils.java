@@ -22,6 +22,7 @@ import static com.mastfrog.colors.GradientUtils.colorToString;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -47,7 +48,11 @@ public final class ImageTestUtils {
 //            && !Boolean.getBoolean("java.awt.headless"));
 
     static boolean visualAssert() {
-        return visualAssert;
+        return visualAssert && !Boolean.getBoolean("java.awt.headless");
+    }
+
+    static void enableVisualAssert() {
+        visualAssert = true;
     }
 
     public static void assertNotEmpty(BufferedImage a) {
@@ -218,6 +223,31 @@ public final class ImageTestUtils {
         CountDownLatch latch = new CountDownLatch(1);
         dlg.display(latch::countDown);
         latch.await();
+    }
+
+    public static void showImages(String title, int zoom, BufferedImage... imgs) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        EventQueue.invokeLater(() -> {
+//            ImageComponent comp = new ImageComponent(img, title, zoom);
+            JFrame jf = new JFrame(title) {
+                @Override
+                public void removeNotify() {
+                    super.removeNotify(); //To change body of generated methods, choose Tools | Templates.
+                    latch.countDown();
+                }
+            };
+            jf.setLayout(new FlowLayout());
+            for (BufferedImage bi : imgs) {
+                ImageComponent comp = new ImageComponent(bi, title, zoom);
+                jf.add(comp);
+            }
+            jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            jf.pack();
+            jf.setLocation(new Point(100, 100));
+            jf.setVisible(true);
+        });
+        latch.await();
+
     }
 
     public static void showImage(String title, BufferedImage img, int zoom) throws InterruptedException {

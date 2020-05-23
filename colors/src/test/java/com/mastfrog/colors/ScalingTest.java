@@ -18,8 +18,6 @@
  */
 package com.mastfrog.colors;
 
-import com.mastfrog.colors.Gradients;
-import com.mastfrog.colors.GradientPainter;
 import static com.mastfrog.colors.ImageTestUtils.assertImages;
 import static com.mastfrog.colors.ImageTestUtils.newImage;
 import java.awt.Color;

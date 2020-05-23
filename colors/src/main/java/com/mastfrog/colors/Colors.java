@@ -445,7 +445,7 @@ public final class Colors {
                     best = ahsb;
                 }
             }
-            System.out.println("Best of " + o1 + " " + o2 + " is " + (best == ahsb ? o1 : o2));
+//            System.out.println("Best of " + o1 + " " + o2 + " is " + (best == ahsb ? o1 : o2));
             return best == ahsb ? -1 : 1;
         }
     }
