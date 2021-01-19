@@ -20,7 +20,7 @@ under the License.
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
     </parent>
     <artifactId>visual-library-tabbedcontrol</artifactId>
     <packaging>nbm</packaging>
@@ -74,6 +74,12 @@ under the License.
             <artifactId>org-netbeans-swing-plaf</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-core-ui</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>runtime</scope>
+        </dependency>
         <!--        <dependency>
             <groupId>com.bulenkov</groupId>
             <artifactId>darcula</artifactId>
@@ -87,6 +93,12 @@ under the License.
                 <extensions>true</extensions>
                 <configuration>
                     <finalName>visual-library-tabbedcontrol</finalName>
+                    <moduleDependencies>
+                        <dependency>
+                            <id>org.netbeans.modules:org-netbeans-modules-projectapi</id>
+                            <explicitValue>org.netbeans.core.ui/1 &gt; 1.0</explicitValue>
+                        </dependency>
+                    </moduleDependencies>
                 </configuration>
             </plugin>
             <plugin>

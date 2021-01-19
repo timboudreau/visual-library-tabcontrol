@@ -119,7 +119,30 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
         return widgets.size() == 1 && widgets.get(0) == widget;
     }
 
-    boolean sync() {
+    volatile boolean enqueued = false;
+
+    void sync() {
+        if (true) {
+//            _sync();
+//            return;
+        }
+        // We have had some races that result in every tab getting the
+        // same name, so try to untangle that and double-plus ensure we
+        // only update on the event thread.  This should get us out of the
+        // way of flurries of model updates and coalesce those down to one
+        // sync pass.
+        if (!enqueued) {
+            synchronized (this) {
+                if (!enqueued) {
+                    enqueued = true;
+                    EventQueue.invokeLater(this::_sync);
+                }
+            }
+        }
+    }
+
+    void _sync() {
+        enqueued = false;
         boolean wasEmpty = modelSnapshot.isEmpty();
         int oldSelection = sel.getSelectedIndex();
         TabWidget oldSelectedWidget = oldSelection >= 0 && oldSelection < widgets.size()
@@ -188,7 +211,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
         if (onChange != null) { // Null if called in constructor
             onChange.run();
         }
-        return modelSizeChanged;
+//        return modelSizeChanged;
     }
 
     private void syncOne(int index) {

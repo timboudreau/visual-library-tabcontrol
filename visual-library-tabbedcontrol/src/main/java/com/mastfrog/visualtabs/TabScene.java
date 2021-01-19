@@ -587,6 +587,17 @@ public class TabScene extends Scene {
     void init() {
         selectionListener.init();
         selection.addChangeListener(selectionListener);
+        model.addChangeListener(ce -> {
+            // Text changes can result in a tab bounds moving while the
+            // glow box remains around the tab's previous position
+            if (getView() != null && getView().isShowing()) {
+                glow.revalidate();
+                glowLayer.revalidate();
+                glowLayer.getLayout().layout(glowLayer);
+                validate();
+                repaint();
+            }
+        });
         sync();
         ensureSelectedWidget(getSelectedWidget());
         validate();
@@ -805,8 +816,8 @@ public class TabScene extends Scene {
         }
     };
 
-    boolean sync() {
-        return mapper.sync();
+    void sync() {
+        mapper.sync();
     }
 
     private TabDisplayer displayer() {
