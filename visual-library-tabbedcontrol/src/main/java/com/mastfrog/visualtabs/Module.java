@@ -18,23 +18,42 @@
  */
 package com.mastfrog.visualtabs;
 
+import java.awt.EventQueue;
+import java.beans.PropertyChangeListener;
 import javax.swing.UIManager;
 import static org.netbeans.swing.tabcontrol.TabDisplayer.EDITOR_TAB_DISPLAYER_UI_CLASS_ID;
 import org.openide.modules.ModuleInstall;
 
 /**
+ * Initializes the look and feel constants.
  *
  * @author Tim Boudreau
  */
 public class Module extends ModuleInstall {
 
+    static final String VALUE = "com.mastfrog.visualtabls.VisualTabDisplayerUI";
+    static final PropertyChangeListener PCL = evt -> {
+        if (evt != null && EDITOR_TAB_DISPLAYER_UI_CLASS_ID.equals(evt.getPropertyName()))  {
+            if (!VALUE.equals(evt.getNewValue())) {
+                init();
+            }
+        }
+    };
+
     @Override
     public void restored() {
         super.restored();
+        init();
+        EventQueue.invokeLater(Module::init);
     }
 
     static {
-        UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VisualTabDisplayerUI.class.getName());
+        init();
+        UIManager.addPropertyChangeListener(PCL);
+        UIManager.getDefaults().addPropertyChangeListener(PCL);
     }
 
+    static void init() {
+        UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VALUE);
+    }
 }
