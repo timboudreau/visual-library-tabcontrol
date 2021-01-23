@@ -20,7 +20,7 @@ under the License.
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-        <version>0.5.1</version>
+        <version>0.5.2</version>
     </parent>
     <artifactId>visual-library-tabbedcontrol</artifactId>
     <packaging>nbm</packaging>
@@ -93,6 +93,9 @@ under the License.
                 <extensions>true</extensions>
                 <configuration>
                     <finalName>visual-library-tabbedcontrol</finalName>
+                    <author>Tim Boudreau</author>
+                    <requiresRestart>true</requiresRestart>
+                    <homePageUrl>https://github.com/timboudreau/visual-library-tabcontrol</homePageUrl>
                     <moduleDependencies>
                         <dependency>
                             <id>org.netbeans.modules:org-netbeans-modules-projectapi</id>
