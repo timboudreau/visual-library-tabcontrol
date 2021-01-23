@@ -68,22 +68,30 @@ public class TabsAppearance {
     private static final Color hl = Color.ORANGE;
     private static final Color hlDark = new Color(20, 10, 80);
 
+    static Boolean dark;
     static BooleanSupplier isDark = (() -> {
+        if (dark != null) {
+            return dark;
+        }
+        if ("DarkNimbusLookAndFeel".equals(UIManager.getLookAndFeel().getClass().getSimpleName())) {
+            return true;
+        }
+
         // Dark theme checker misses newer versions of Nimbus
         // which leave the UIManager key value pairs it checks
         // unset
         boolean res = Colors.darkTheme().getAsBoolean();
         if (!res) {
-            return res;
+            return dark = res;
         }
         Color c = UIManager.getColor("controlText");
         if (c == null) {
-            return true;
+            return dark = true;
         }
         if (c.getRed() == 0 && c.getGreen() == 0 && c.getBlue() == 0) {
-            return false;
+            return dark = false;
         }
-        return true;
+        return dark = true;
     });
 
     static Font defaultFont;
@@ -116,7 +124,7 @@ public class TabsAppearance {
             = selectedBase
                     .withBrightnessFrom(Colors.fromUIManager(Color.GRAY, "control"))
                     .withSaturationNoGreaterThan(0.075f)
-                    .darkenOrLighten(-0.325f, isDark)
+                    .darkenOrLighten(-0.4725f, isDark)
                     .cache();
 
     static final ColorSupplier hoveredHl
@@ -140,19 +148,22 @@ public class TabsAppearance {
     static ColorSupplier baseColor
             = Colors.fromUIManager(hl, TAB_UNSEL_FILL_BRIGHT_UPPER,
                     TAB_UNSEL_FILL_DARK_UPPER, TAB_UNSELECTED_FILL_DARK, "control")
-                    .brightenBy(0.125f).cache();
+                    .darkenOrLighten(0.125f, isDark)
+                    .cache();
 
-    static ColorSupplier baseHl = Colors.fromUIManager(base, "control").darkenBy(0.25f);
+//    static ColorSupplier baseHl = Colors.fromUIManager(base, "control").darkenBy(0.25f);
+    static ColorSupplier baseHl = baseColor.darkenOrLighten(0.1275F, () -> !isDark.getAsBoolean());
 
     private static final ColorSupplier miniHighlight
             = selectedBase.withSaturation(0.75f)
                     .rotatingHueBy(-0.0375f)
                     .withBrightnessNoGreaterThanThatOf(selectedHl).cache();
 
-//            Colors.fromUIManager(Color.BLUE.brighter(), "TabbedPane.focus");
     private static final ColorSupplier miniHighlightEnd = miniHighlight.withAlpha(0);
 
     static ColorSupplier selectedForeground
+            //            = selectedBase.withBrightnessFrom(selectedHl.invertRGB())
+            //                .withSaturationNoGreaterThan(0.25f)
             = miniHighlight.darkerOf(selectedBase).contrasting()
                     .withSaturationNoGreaterThan(0.25f);
 
@@ -182,10 +193,21 @@ public class TabsAppearance {
     private BackgroundPainter selectedTabPainter = TabsAppearance::defaultPaintSelected;
     private BackgroundPainter unselectedTabPainter = TabsAppearance::defaultPaintUnselected;
 
+    static {
+        System.out.println("ctrlText " + UIManager.getColor("controlText"));
+        System.out.println("textText " + UIManager.getColor("textText"));
+        System.out.println("textText " + UIManager.getColor("TabbedPane.text"));
+        System.out.println("Dark? " + isDark.getAsBoolean());
+    }
+
     private static ColorSupplier textFallback = Colors.fixed(Color.BLACK).unless(isDark, Colors.fixed(Color.WHITE));
     private static ColorSupplier defaultUnselectedForeground
-            = Colors.fromUIManager(textFallback,
-                    "controlText", "textText", "textInactiveText")
+            = selectedHl.invertRGB()
+                    .withSaturationNoGreaterThan(0.25f)
+                    .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
+                    //baseColor.contrasting()
+                    //            = Colors.fromUIManager(textFallback,
+                    //                    "controlText", "textText", "textInactiveText")
                     .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
                     );
 //
@@ -199,7 +221,7 @@ public class TabsAppearance {
     private int tabsMargin = 5;
     private int tabInnerRightMargin = 5;
     private int closeIconSize = 9;
-    private int glowWidth = 9;
+    private int glowWidth = 15;
     private int tabInternalPadding = 6;
     private int panTrayRightInset = 24;
     private int tabsInnerSpacing = 4;

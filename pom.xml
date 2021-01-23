@@ -19,7 +19,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-    <version>0.5.4</version>
+    <version>0.5.5</version>
     <packaging>pom</packaging>
     <name>Visual Library Tabbed Control Parent</name>
     <modules>

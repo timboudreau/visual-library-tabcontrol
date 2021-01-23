@@ -21,9 +21,7 @@ package com.mastfrog.visualtabs;
 import com.mastfrog.visualtabs.buttons.ButtonsPanel;
 import com.mastfrog.visualtabs.PanTray.DragScrollTimer;
 import com.mastfrog.visualtabs.buttons.ButtonAction;
-import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
 import java.awt.AWTEvent;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -48,18 +46,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import javax.swing.AbstractAction;
-import javax.swing.DefaultSingleSelectionModel;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -77,7 +69,6 @@ import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
-import org.netbeans.swing.tabcontrol.DefaultTabDataModel;
 import org.netbeans.swing.tabcontrol.TabData;
 import org.netbeans.swing.tabcontrol.TabDataModel;
 import org.netbeans.swing.tabcontrol.TabDisplayer;
@@ -1469,6 +1460,32 @@ public class TabScene extends Scene {
         return active;
     }
 
+    static class TestIcon implements Icon {
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            g.setColor(Color.orange);
+            g.fillRect(x, y, 11, 11);
+            g.setColor(Color.black);
+            g.drawRect(x, y, 11, 11);
+            g.setColor(Color.blue);
+            g.fillRoundRect(x + 3, y + 3, 3, 3, 4, 4);
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 11;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 11;
+        }
+    }
+
+
+    /*
+
     public static void main(String[] args) throws Throwable {
         System.setProperty("swing.aatext", "true");
         System.setProperty("hidpi", "true");
@@ -1477,8 +1494,10 @@ public class TabScene extends Scene {
         System.setProperty("jdk.gtk.version", "3");
 
         UIManager.setLookAndFeel(new GTKLookAndFeel());
+//        UIManager.setLookAndFeel(new DarkNimbusLookAndFeel());
 //        UIManager.setLookAndFeel(new NimbusLookAndFeel());
 //        UIManager.setLookAndFeel(new MetalLookAndFeel());
+//        UIManager.setLookAndFeel(new MotifLookAndFeel());
 
         DefaultTabDataModel mdl = new DefaultTabDataModel();
 
@@ -1553,29 +1572,6 @@ public class TabScene extends Scene {
         });
     }
 
-    static class TestIcon implements Icon {
-
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            g.setColor(Color.orange);
-            g.fillRect(x, y, 11, 11);
-            g.setColor(Color.black);
-            g.drawRect(x, y, 11, 11);
-            g.setColor(Color.blue);
-            g.fillRoundRect(x + 3, y + 3, 3, 3, 4, 4);
-        }
-
-        @Override
-        public int getIconWidth() {
-            return 11;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 11;
-        }
-    }
-
     static class TestIcon2 implements Icon {
 
         @Override
@@ -1596,4 +1592,168 @@ public class TabScene extends Scene {
             return 16;
         }
     }
+    public static class DarkNimbusLookAndFeel extends NimbusLookAndFeel {
+
+        @Override
+        public String getName() {
+            return NbBundle.getMessage(DarkNimbusLookAndFeel.class, "LBL_DARK_NIMBUS");
+        }
+
+        @Override
+        public UIDefaults getDefaults() {
+            UIDefaults res = super.getDefaults();
+            res.put("nb.dark.theme", Boolean.TRUE); //NOI18N
+            res.put("nb.preferred.color.profile", "Norway Today"); //NOI18N
+            return res;
+        }
+
+        @Override
+        public Color getDerivedColor(String uiDefaultParentName, float hOffset, float sOffset, float bOffset, int aOffset, boolean uiResource) {
+            float brightness = bOffset;
+            if ((bOffset == -0.34509805f) && "nimbusBlueGrey".equals(uiDefaultParentName)) { //NOI18N
+                //Match only for TreeHandle Color in Nimbus, workaround for #231953
+                brightness = -bOffset;
+            }
+            return super.getDerivedColor(uiDefaultParentName, hOffset, sOffset, brightness, aOffset, uiResource);
+        }
+
+        @Override
+        public void initialize() {
+            super.initialize();
+            DarkNimbusTheme.install(this);
+        }
+
+        public static class DarkNimbusTheme {
+
+            public static void install(LookAndFeel laf) {
+
+                Color caretForeground = new Color(230, 230, 230);
+                Color selectionBackground = new Color(104, 93, 156);
+                Color selectedText = new Color(255, 255, 255);
+
+                UIManager.put("nb.dark.theme", Boolean.TRUE);
+                UIManager.put("control", new Color(128, 128, 128));
+                UIManager.put("info", new Color(128, 128, 128));
+                UIManager.put("nimbusBase", new Color(18, 30, 49));
+                UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+                UIManager.put("nimbusDisabledText", new Color(196, 196, 196));
+                UIManager.put("nimbusFocus", new Color(115, 164, 209));
+                UIManager.put("nimbusGreen", new Color(176, 179, 50));
+                UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
+                UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+                UIManager.put("nimbusOrange", new Color(191, 98, 4));
+                UIManager.put("nimbusRed", new Color(169, 46, 34));
+                UIManager.put("nimbusSelectedText", selectedText);
+                UIManager.put("nimbusSelectionBackground", selectionBackground);
+                UIManager.put("text", new Color(230, 230, 230));
+//        UIManager.put( "nb.imageicon.filter", new DarkIconFilter() );
+                UIManager.put("nb.errorForeground", new Color(127, 0, 0)); //NOI18N
+                UIManager.put("nb.warningForeground", new Color(255, 216, 0)); //NOI18N
+
+                UIManager.put("nb.heapview.foreground", new Color(230, 230, 230)); //NOI18N
+                UIManager.put("nb.heapview.background", new Color(18, 30, 49)); //NOI18N
+
+                UIManager.put("PropSheet.setBackground", new Color(112, 112, 112)); //NOI18N
+                UIManager.put("PropSheet.selectedSetBackground", new Color(100, 100, 100)); //NOI18N
+
+                UIManager.put("nb.bugtracking.comment.background", new Color(112, 112, 112)); //NOI18N
+                UIManager.put("nb.bugtracking.comment.foreground", new Color(230, 230, 230)); //NOI18N
+                UIManager.put("nb.bugtracking.label.highlight", new Color(160, 160, 160)); //NOI18N
+                UIManager.put("nb.bugtracking.table.background", new Color(18, 30, 49)); //NOI18N
+                UIManager.put("nb.bugtracking.table.background.alternate", new Color(13, 22, 36)); //NOI18N
+                UIManager.put("nb.bugtracking.new.color", new Color(0, 224, 0)); //NOI18N
+                UIManager.put("nb.bugtracking.modified.color", new Color(81, 182, 255)); //NOI18N
+                UIManager.put("nb.bugtracking.obsolete.color", new Color(153, 153, 153)); //NOI18N
+                UIManager.put("nb.bugtracking.conflict.color", new Color(255, 51, 51)); //NOI18N
+
+                UIManager.put("nb.html.link.foreground", new Color(164, 164, 255)); //NOI18N
+                UIManager.put("nb.html.link.foreground.hover", new Color(255, 216, 0)); //NOI18N
+                UIManager.put("nb.html.link.foreground.visited", new Color(0, 200, 0)); //NOI18N
+                UIManager.put("nb.html.link.foreground.focus", new Color(255, 216, 0)); //NOI18N
+
+                UIManager.put("nb.startpage.defaultbackground", Boolean.TRUE);
+                UIManager.put("nb.startpage.defaultbuttonborder", Boolean.TRUE);
+                UIManager.put("nb.startpage.bottombar.background", new Color(64, 64, 64));
+                UIManager.put("nb.startpage.topbar.background", new Color(64, 64, 64));
+                UIManager.put("nb.startpage.border.color", new Color(18, 30, 49));
+                UIManager.put("nb.startpage.tab.border1.color", new Color(64, 64, 64));
+                UIManager.put("nb.startpage.tab.border2.color", new Color(64, 64, 64));
+                UIManager.put("nb.startpage.rss.details.color", new Color(230, 230, 230));
+                UIManager.put("nb.startpage.rss.header.color", new Color(128, 128, 255));
+                UIManager.put("nb.startpage.contentheader.color1", new Color(12, 33, 61)); //NOI18N
+                UIManager.put("nb.startpage.contentheader.color2", new Color(16, 24, 42)); //NOI18N
+
+                UIManager.put("nb.popupswitcher.background", new Color(18, 30, 49)); //NOI18N
+
+                UIManager.put("TextField.selectionForeground", selectedText); //NOI18N
+                UIManager.put("TextField.selectionBackground", selectionBackground); //NOI18N
+                UIManager.put("TextField.caretForeground", caretForeground); //NOI18N
+                UIManager.put("nb.editor.errorstripe.caret.color", caretForeground); //NOI18N
+
+                UIManager.put("nb.wizard.hideimage", Boolean.TRUE); //NOI18N
+
+                //diff & diff sidebar
+                UIManager.put("nb.diff.added.color", new Color(36, 52, 36)); //NOI18N
+                UIManager.put("nb.diff.changed.color", new Color(36, 47, 101)); //NOI18N
+                UIManager.put("nb.diff.deleted.color", new Color(56, 30, 30)); //NOI18N
+                UIManager.put("nb.diff.applied.color", new Color(36, 52, 36)); //NOI18N
+                UIManager.put("nb.diff.notapplied.color", new Color(36, 47, 101)); //NOI18N
+                UIManager.put("nb.diff.unresolved.color", new Color(56, 30, 30)); //NOI18N
+
+                UIManager.put("nb.diff.sidebar.changed.color", new Color(18, 30, 74)); //NOI18N
+                UIManager.put("nb.diff.sidebar.deleted.color", new Color(66, 30, 49)); //NOI18N
+
+                UIManager.put("nb.versioning.tooltip.background.color", new Color(18, 30, 74)); //NOI18N
+
+                //form designer
+                UIManager.put("nb.formdesigner.gap.fixed.color", new Color(112, 112, 112)); //NOI18N
+                UIManager.put("nb.formdesigner.gap.resizing.color", new Color(116, 116, 116)); //NOI18N
+                UIManager.put("nb.formdesigner.gap.min.color", new Color(104, 104, 104)); //NOI18N
+
+                UIManager.put("nbProgressBar.Foreground", new Color(230, 230, 230));
+                UIManager.put("nbProgressBar.popupDynaText.foreground", new Color(191, 186, 172));
+
+                // debugger
+                UIManager.put("nb.debugger.debugging.currentThread", new Color(30, 80, 28)); //NOI18N
+                UIManager.put("nb.debugger.debugging.highlightColor", new Color(40, 60, 38)); //NOI18N
+                UIManager.put("nb.debugger.debugging.BPHits", new Color(65, 65, 0)); //NOI18N
+                UIManager.put("nb.debugger.debugging.bars.BPHits", new Color(120, 120, 25)); //NOI18N
+                UIManager.put("nb.debugger.debugging.bars.currentThread", new Color(40, 100, 35)); //NOI18N
+
+                //versioning
+                UIManager.put("nb.versioning.added.color", new Color(0, 224, 0)); //NOI18N
+                UIManager.put("nb.versioning.modified.color", new Color(81, 182, 255)); //NOI18N
+                UIManager.put("nb.versioning.deleted.color", new Color(153, 153, 153)); //NOI18N
+                UIManager.put("nb.versioning.conflicted.color", new Color(255, 51, 51)); //NOI18N
+                UIManager.put("nb.versioning.ignored.color", new Color(153, 153, 153)); //NOI18N
+                UIManager.put("nb.versioning.remotemodification.color", new Color(230, 230, 230)); //NOI18N
+
+                // autoupdate
+                UIManager.put("nb.autoupdate.search.highlight", new Color(255, 75, 0));
+
+                UIManager.put("selection.highlight", new Color(202, 152, 0));
+                UIManager.put("textArea.background", new Color(128, 128, 128));
+
+                UIManager.put("nb.close.tab.icon.enabled.name", "org/openide/awt/resources/vista_close_enabled.png");
+                UIManager.put("nb.close.tab.icon.pressed.name", "org/openide/awt/resources/vista_close_pressed.png");
+                UIManager.put("nb.close.tab.icon.rollover.name", "org/openide/awt/resources/vista_close_rollover.png");
+                UIManager.put("nb.bigclose.tab.icon.enabled.name", "org/openide/awt/resources/vista_bigclose_rollover.png");
+                UIManager.put("nb.bigclose.tab.icon.pressed.name", "org/openide/awt/resources/vista_bigclose_rollover.png");
+                UIManager.put("nb.bigclose.tab.icon.rollover.name", "org/openide/awt/resources/vista_bigclose_rollover.png");
+
+                //browser picker
+                UIManager.put("Nb.browser.picker.background.light", new Color(116, 116, 116));
+                UIManager.put("Nb.browser.picker.foreground.light", new Color(192, 192, 192));
+                //#233622
+                UIManager.put("List[Selected].textForeground", UIManager.getColor("nimbusSelectedText"));
+
+                UIManager.put("nb.explorer.noFocusSelectionBackground", UIManager.get("nimbusSelectionBackground"));
+
+                //search in projects
+                UIManager.put("nb.search.sandbox.highlight", selectionBackground);
+                UIManager.put("nb.search.sandbox.regexp.wrong", new Color(255, 71, 71));
+            }
+        }
+    }
+     */
 }
