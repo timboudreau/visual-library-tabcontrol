@@ -20,6 +20,8 @@ package com.mastfrog.visualtabs;
 
 import com.mastfrog.visualtabs.TabsAppearance.TabIcon;
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -27,6 +29,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -271,8 +274,38 @@ final class TabWidget extends Widget implements Supplier<TabData> {
             g.setClip(r);
             p.paint(g, state, lastKind, r, lastHoverTick, lastHoverOf);
             g.setClip(oldClip);
+            paintLeftRightEdges(g, r);
+        } else {
+            paintLeftRightEdges(g, r);
         }
     }
+
+    private final Rectangle edgeRect = new Rectangle();
+
+    public void paintLeftRightEdges(Graphics2D g, Rectangle r) {
+        Stroke old = g.getStroke();
+        TabKind k = this.kindFinder.apply(this);
+        if (k.isLeftEdge() && g.hitClip(r.x - appearance.edgeWidth(), r.y, appearance.edgeWidth(), r.height)) {
+            g.setStroke(appearance.edgeStroke());
+            edgeRect.setBounds(r.x, r.y, appearance.edgeWidth(), r.height);
+            appearance.leftEdgePaint(g, edgeRect)
+                    .fill(g, edgeRect);
+
+//            g.setColor(Color.BLACK);
+//            g.drawLine(r.x, r.y, r.x, r.y + r.height);
+        }
+        if (k.isRightEdge() && g.hitClip(r.x + r.width, r.y, appearance.edgeWidth(), r.height)) {
+            g.setStroke(appearance.edgeStroke());
+            edgeRect.setBounds(r.x + r.width, r.y, appearance.edgeWidth(), r.height);
+            appearance.rightEdgePaint(g, edgeRect)
+                    .fill(g, edgeRect);
+//            g.setColor(Color.BLACK);
+//            g.drawLine(r.x + r.width, r.y, r.x + r.width, r.y + r.height);
+        }
+        g.setStroke(old);
+    }
+
+    static Stroke edgeStroke = new BasicStroke(0.5F);
 
     private int lastHoverTick;
     private int lastHoverOf;

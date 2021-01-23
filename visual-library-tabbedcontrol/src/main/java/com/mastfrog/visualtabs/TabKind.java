@@ -31,4 +31,26 @@ public enum TabKind {
     BETWEEN,
     DRAG_PROXY
     ;
+
+    boolean isLeftEdge() {
+        switch(this) {
+            case SINGLE :
+            case LEFT_EDGE :
+            case DRAG_PROXY :
+                return true;
+            default :
+                return false;
+        }
+    }
+
+    boolean isRightEdge() {
+        switch(this) {
+            case RIGHT_EDGE :
+            case SINGLE :
+            case DRAG_PROXY :
+                return true;
+            default :
+                return false;
+        }
+    }
 }

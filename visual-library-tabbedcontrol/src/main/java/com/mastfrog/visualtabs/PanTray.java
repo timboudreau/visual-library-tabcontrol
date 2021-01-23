@@ -84,9 +84,9 @@ class PanTray extends Widget {
     long lastScrollEvent = 0;
     int rapidCount;
 
-    private static final long RAPID = 25;
-    private static final int TRIGGER_RAPID_COUNT = 3;
-    private static final int RAPID_MULTIPLIER = 17;
+    private static final long RAPID = 55;
+    private static final int TRIGGER_RAPID_COUNT = 4;
+    private static final int RAPID_MULTIPLIER = 25;
 
     private void mouseWheelMoved(WidgetAction.WidgetMouseWheelEvent event) {
         long now = System.currentTimeMillis();

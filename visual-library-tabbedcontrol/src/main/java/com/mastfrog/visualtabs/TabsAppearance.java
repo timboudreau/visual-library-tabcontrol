@@ -125,6 +125,7 @@ public class TabsAppearance {
                     .withBrightnessFrom(Colors.fromUIManager(Color.GRAY, "control"))
                     .withSaturationNoGreaterThan(0.075f)
                     .darkenOrLighten(-0.4725f, isDark)
+                    .withBrightnessNoGreaterThan(0.75F)
                     .cache();
 
     static final ColorSupplier hoveredHl
@@ -152,20 +153,23 @@ public class TabsAppearance {
                     .cache();
 
 //    static ColorSupplier baseHl = Colors.fromUIManager(base, "control").darkenBy(0.25f);
-    static ColorSupplier baseHl = baseColor.darkenOrLighten(0.1275F, () -> !isDark.getAsBoolean());
+    static ColorSupplier baseHl = baseColor.darkenOrLighten(0.1275F, () -> !isDark.getAsBoolean()).cache();
+    ;
 
     private static final ColorSupplier miniHighlight
             = selectedBase.withSaturation(0.75f)
                     .rotatingHueBy(-0.0375f)
                     .withBrightnessNoGreaterThanThatOf(selectedHl).cache();
 
-    private static final ColorSupplier miniHighlightEnd = miniHighlight.withAlpha(0);
+    private static final ColorSupplier miniHighlightEnd = miniHighlight.withAlpha(0).cache();
+    ;
 
     static ColorSupplier selectedForeground
             //            = selectedBase.withBrightnessFrom(selectedHl.invertRGB())
             //                .withSaturationNoGreaterThan(0.25f)
             = miniHighlight.darkerOf(selectedBase).contrasting()
-                    .withSaturationNoGreaterThan(0.25f);
+                    .withSaturationNoGreaterThan(0.25f).cache();
+    ;
 
     private Supplier<Color> background = Colors.fromUIManager(Color.GRAY, "control");
 
@@ -174,7 +178,8 @@ public class TabsAppearance {
                     .withBrightness(0.98f)
                     .withAlpha(167)
                     .cache()
-                    .unless(isDark, Colors.fixed(new Color(120, 120, 225, 172)));
+                    .unless(isDark, Colors.fixed(new Color(120, 120, 225, 172))).cache();
+    ;
 
     private Supplier<Color> glowDark = defaultGlowDark;
 
@@ -185,7 +190,8 @@ public class TabsAppearance {
     private static final Color WHITE_FULL_ALPHA = new Color(255, 255, 255, 0);
 
     private Supplier<Color> glowLight
-            = Colors.fixed(WHITE_FULL_ALPHA).unless(isDark, Colors.toUIColorSupplier(background).withAlpha(0));
+            = Colors.fixed(WHITE_FULL_ALPHA).unless(isDark, Colors.toUIColorSupplier(background).withAlpha(0)).cache();
+    ;
     private static final ColorSupplier directionFallback
             = Colors.toUIColorSupplier(defaultGlowDark.withSaturation(0.9f)).withAlpha(0).cache();
 
@@ -193,26 +199,26 @@ public class TabsAppearance {
     private BackgroundPainter selectedTabPainter = TabsAppearance::defaultPaintSelected;
     private BackgroundPainter unselectedTabPainter = TabsAppearance::defaultPaintUnselected;
 
-    static {
-        System.out.println("ctrlText " + UIManager.getColor("controlText"));
-        System.out.println("textText " + UIManager.getColor("textText"));
-        System.out.println("textText " + UIManager.getColor("TabbedPane.text"));
-        System.out.println("Dark? " + isDark.getAsBoolean());
-    }
-
     private static ColorSupplier textFallback = Colors.fixed(Color.BLACK).unless(isDark, Colors.fixed(Color.WHITE));
     private static ColorSupplier defaultUnselectedForeground
-            = selectedHl.invertRGB()
-                    .withSaturationNoGreaterThan(0.25f)
-                    .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
-                    //baseColor.contrasting()
-                    //            = Colors.fromUIManager(textFallback,
-                    //                    "controlText", "textText", "textInactiveText")
-                    .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
-                    );
+            = new CenterRepulsion(
+                    selectedHl.invertRGB()
+                            .withSaturationNoGreaterThan(0.25f)
+                            .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
+                            //baseColor.contrasting()
+                            //            = Colors.fromUIManager(textFallback,
+                            //                    "controlText", "textText", "textInactiveText")
+                            .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
+                            ), selectedHl).cache();
+
+    private static ColorSupplier defaultHoveredForeground
+            = hoveredHl.invertRGB().withSaturationNoGreaterThan(0.25F).cache();
+    ;
 //
     private Function<ObjectState, Paint> tabForeground = state -> {
-        return state.isSelected() ? selectedForeground.get() : defaultUnselectedForeground.get();
+        return state.isSelected() ? selectedForeground.get()
+                : state.isHovered() || state.isWidgetHovered() || state.isWidgetAimed() ? defaultHoveredForeground.get()
+                : defaultUnselectedForeground.get();
     };
 
     private Supplier<Font> font = TabsAppearance::defaultFont;
@@ -222,7 +228,7 @@ public class TabsAppearance {
     private int tabInnerRightMargin = 5;
     private int closeIconSize = 9;
     private int glowWidth = 15;
-    private int tabInternalPadding = 6;
+    private int tabInternalPadding = 7;
     private int panTrayRightInset = 24;
     private int tabsInnerSpacing = 4;
     private int panTrayLeftInset = 24;
@@ -232,7 +238,7 @@ public class TabsAppearance {
     private final EnumMap<TabKind, Border> borderForKind = new EnumMap(TabKind.class);
     private final Map<ButtonState, TabIcon> closeIcons = new EnumMap<>(ButtonState.class);
 
-    private Supplier<Color> selectionDirectionIndicatorColor = directionFallback;
+    private ColorSupplier selectionDirectionIndicatorColor = directionFallback;
 
     private BiFunction<Graphics2D, Rectangle, GradientPainter> tabBorderColorBottom = (g, r) -> {
         return gradients().linear(g, r.x, r.y,
@@ -242,6 +248,28 @@ public class TabsAppearance {
         return gradients().linear(g, r.x, r.y,
                 tabBorderLow.get(), r.x, r.y + r.height, tabBorderHigh.get());
     };
+
+    private static final int EDGE_WIDTH = 2;
+
+    private static final BasicStroke EDGE_STROKE = new BasicStroke(EDGE_WIDTH);
+
+    int edgeWidth() {
+        return EDGE_WIDTH;
+    }
+
+    Stroke edgeStroke() {
+        return EDGE_STROKE;
+    }
+
+    GradientPainter leftEdgePaint(Graphics2D g, Rectangle r) {
+        Color c = baseHl.withAlpha(255).darkenOrLighten(0.125F, () -> !isDark.getAsBoolean()).get();
+        return gradients().horizontal(g, r.x, r.y, c, r.width, Colors.fixed(c).withAlpha(0).get());
+    }
+
+    GradientPainter rightEdgePaint(Graphics2D g, Rectangle r) {
+        Color c = baseHl.withAlpha(255).darkenOrLighten(0.125F, () -> !isDark.getAsBoolean()).get();
+        return gradients().horizontal(g, r.x, r.y, Colors.fixed(c).withAlpha(0).get(), r.width, c);
+    }
 
     private static Color base(ObjectState state) {
         if (state.isSelected()) {
@@ -602,7 +630,7 @@ public class TabsAppearance {
         return selectionDirectionIndicatorColor.get();
     }
 
-    public TabsAppearance setSelectionDirectionIndicatorColor(Supplier<Color> c) {
+    public TabsAppearance setSelectionDirectionIndicatorColor(ColorSupplier c) {
         selectionDirectionIndicatorColor = c;
         return this;
     }
@@ -850,7 +878,49 @@ public class TabsAppearance {
         public int getIconHeight() {
             return closeIconSize();
         }
-
     }
 
+    static class CenterRepulsion implements ColorSupplier {
+
+        private final ColorSupplier delegate;
+        private final ColorSupplier awayFrom;
+
+        public CenterRepulsion(ColorSupplier delegate, ColorSupplier awayFrom) {
+            this.delegate = delegate;
+            this.awayFrom = awayFrom;
+        }
+
+        @Override
+        public Color get() {
+            Color delColor = delegate.get();
+            float delBrightness = brightnessOf(delColor);
+            float distanceToMiddle = delBrightness - 0.5F;
+            if (Math.abs(distanceToMiddle) > 0.25) {
+                return delColor;
+            }
+            Color repelColor = awayFrom.get();
+            float repulBrightness = brightnessOf(repelColor);
+            float repDistance = repulBrightness - 0.5F;
+            if (repDistance <= 0.25) {
+                boolean dark = !targetIsDark(repulBrightness);
+                if (dark) {
+                    return delegate.darkenBy(0.325F).get();
+                } else {
+                    return delegate.brightenBy(0.325F).get();
+                }
+            } else {
+                return delegate.withBrightnessFrom(awayFrom.invertRGB().withSaturation(0)).get();
+            }
+        }
+
+        boolean targetIsDark(float bri) {
+            return bri >= 0.625F;
+        }
+
+        static float brightnessOf(Color c) {
+            float[] fl = new float[3];
+            Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), fl);
+            return fl[2];
+        }
+    }
 }
