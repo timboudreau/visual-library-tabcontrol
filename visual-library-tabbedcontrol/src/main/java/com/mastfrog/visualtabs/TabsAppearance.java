@@ -68,7 +68,23 @@ public class TabsAppearance {
     private static final Color hl = Color.ORANGE;
     private static final Color hlDark = new Color(20, 10, 80);
 
-    static BooleanSupplier isDark = Colors.darkTheme();
+    static BooleanSupplier isDark = (() -> {
+        // Dark theme checker misses newer versions of Nimbus
+        // which leave the UIManager key value pairs it checks
+        // unset
+        boolean res = Colors.darkTheme().getAsBoolean();
+        if (!res) {
+            return res;
+        }
+        Color c = UIManager.getColor("controlText");
+        if (c == null) {
+            return true;
+        }
+        if (c.getRed() == 0 && c.getGreen() == 0 && c.getBlue() == 0) {
+            return false;
+        }
+        return true;
+    });
 
     static Font defaultFont;
     private static final Gradients gradients = new Gradients();
@@ -90,7 +106,8 @@ public class TabsAppearance {
                     "TabbedPane.borderHightlightColor",
                     "TabRenderer.selectedActivatedBackground",
                     "nb.explorer.unfocusedSelBg"
-            ).darkenOrLighten(0.125f, isDark)
+            ).darkenOrLighten(0.325f, isDark)
+                    .withSaturationNoGreaterThan(0.425F)
                     //                    .withSaturationNoGreaterThan(0.275f)
                     .withBrightnessFrom(Colors.fromUIManager(Color.GRAY, "control"))
                     .unless(isDark, Colors.fromUIManager(ltBlue)).cache();
@@ -137,20 +154,16 @@ public class TabsAppearance {
 
     static ColorSupplier selectedForeground
             = miniHighlight.darkerOf(selectedBase).contrasting()
-                    .withSaturationNoGreaterThan(0.15f);
+                    .withSaturationNoGreaterThan(0.25f);
 
     private Supplier<Color> background = Colors.fromUIManager(Color.GRAY, "control");
 
     private static ColorSupplier defaultGlowDark
             = selectedHl.withSaturation(0.475f)
-                    .withBrightness(0.95f).cache();
-//            Colors.choiceOf(
-//            new Color(255, 132, 50, 172), "Table.dropLineShortColor", "Tree.selectionBackground",
-//            "TabRenderer.selectedActivatedBackground")
-//            .withSaturation(0.325f)
-//            .withBrightness(0.775f)
-//            .unless(isDark, Colors.fixed(new Color(100, 100, 245, 172)))
-//            .cache();
+                    .withBrightness(0.98f)
+                    .withAlpha(167)
+                    .cache()
+                    .unless(isDark, Colors.fixed(new Color(120, 120, 225, 172)));
 
     private Supplier<Color> glowDark = defaultGlowDark;
 
@@ -172,11 +185,10 @@ public class TabsAppearance {
     private static ColorSupplier textFallback = Colors.fixed(Color.BLACK).unless(isDark, Colors.fixed(Color.WHITE));
     private static ColorSupplier defaultUnselectedForeground
             = Colors.fromUIManager(textFallback,
-                    "TabbedPane.text", "controlText", "textText")
-                    .withBrightnessNoLessThanThatOf(Colors.fixed(Color.DARK_GRAY))
+                    "controlText", "textText", "textInactiveText")
                     .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
-                    ).cache();
-
+                    );
+//
     private Function<ObjectState, Paint> tabForeground = state -> {
         return state.isSelected() ? selectedForeground.get() : defaultUnselectedForeground.get();
     };
@@ -186,8 +198,8 @@ public class TabsAppearance {
     private int tabInnerLeftMargin = 5;
     private int tabsMargin = 5;
     private int tabInnerRightMargin = 5;
-    private int closeIconSize = 7;
-    private int glowWidth = 13;
+    private int closeIconSize = 9;
+    private int glowWidth = 9;
     private int tabInternalPadding = 6;
     private int panTrayRightInset = 24;
     private int tabsInnerSpacing = 4;
@@ -229,12 +241,16 @@ public class TabsAppearance {
         return baseHl.get();
     }
 
+    static int bottom(int y, int height) {
+        return y + height - (height / 3);
+    }
+
     static void defaultPaintUnselected(Graphics2D g, ObjectState state, TabKind kind, Rectangle r, int animTick, int of) {
         if (r.width <= 1 || r.height <= 1) {
             return;
         }
 
-        gradients.linear(g, r.x, r.y, base(state), r.x, r.y + r.height, hl(state))
+        gradients.linear(g, r.x, r.y, base(state), r.x, bottom(r.y, r.height), hl(state))
                 .fill(g, r);
 
     }
@@ -256,7 +272,7 @@ public class TabsAppearance {
                 highlight = Colors.between(unHighlight, highlight, pct);
             }
         }
-        gradients.linear(g, r.x, r.y, base, r.x, r.y + r.height, highlight)
+        gradients.linear(g, r.x, r.y, base, r.x, r.y + r.height / 2, highlight)
                 .fill(g, r);
     }
 
@@ -279,7 +295,7 @@ public class TabsAppearance {
                 highlight = Colors.between(unHighlight, highlight, pct);
             }
         }
-        gradients.linear(g, r.x, r.y, base, r.x, r.y + r.height, highlight)
+        gradients.linear(g, r.x, r.y, base, r.x, bottom(r.y, r.height), highlight)
                 .fill(g, r);
 
         // for centering layout

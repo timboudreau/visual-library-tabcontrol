@@ -186,8 +186,8 @@ class PanTray extends Widget {
 
         private final PanTray tray;
         private final Widget widget;
-        private static final int INITIAL_DELAY = 500;
-        private static final int SHORTER_DELAY = 250;
+        private static final int INITIAL_DELAY = 400;
+        private static final int SHORTER_DELAY = 125;
         private final Timer timer = new Timer(INITIAL_DELAY, this);
         private boolean everStarted;
         private int ticks;
@@ -217,7 +217,7 @@ class PanTray extends Widget {
             timer.setDelay(SHORTER_DELAY);
         }
 
-        private static final int SPEEDUP_THRESHOLD = 5;
+        private static final int SPEEDUP_THRESHOLD = 4;
 
         void tick() {
             ticks++;
@@ -258,7 +258,7 @@ class PanTray extends Widget {
 
     void makeNextChildVisible(int direction) {
         assert direction == 1 || direction == -1;
-        int val = panPosition + (75 * -direction); // XXX base on font size or actual child widths
+        int val = panPosition + (90 * -direction); // XXX base on font size or actual child widths
         int[] minMax = minMax();
         if (val < minMax[0]) {
             val = minMax[0];

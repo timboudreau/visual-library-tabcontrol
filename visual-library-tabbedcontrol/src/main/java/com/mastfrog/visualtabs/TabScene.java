@@ -21,6 +21,7 @@ package com.mastfrog.visualtabs;
 import com.mastfrog.visualtabs.buttons.ButtonsPanel;
 import com.mastfrog.visualtabs.PanTray.DragScrollTimer;
 import com.mastfrog.visualtabs.buttons.ButtonAction;
+import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -58,6 +59,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.visual.action.ActionFactory;
@@ -1474,9 +1476,10 @@ public class TabScene extends Scene {
         System.setProperty("awt.useSystemAAFontSettings", "true");
         System.setProperty("jdk.gtk.version", "3");
 
-//        UIManager.setLookAndFeel(new GTKLookAndFeel());
+        UIManager.setLookAndFeel(new GTKLookAndFeel());
 //        UIManager.setLookAndFeel(new NimbusLookAndFeel());
 //        UIManager.setLookAndFeel(new MetalLookAndFeel());
+
         DefaultTabDataModel mdl = new DefaultTabDataModel();
 
         SingleSelectionModel ssm = new DefaultSingleSelectionModel();
