@@ -72,7 +72,6 @@ under the License.
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-swing-plaf</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
 <!--        <dependency>
             <groupId>org.netbeans.modules</groupId>
@@ -96,13 +95,13 @@ under the License.
                     <author>Tim Boudreau</author>
                     <requiresRestart>true</requiresRestart>
                     <homePageUrl>https://github.com/timboudreau/visual-library-tabcontrol</homePageUrl>
-                    <moduleDependencies>
+<!--                    <moduleDependencies>
                         <dependency>
                             <id>org.netbeans.modules:org-netbeans-modules-projectapi</id>
                             <type>loose</type>
                             <explicitValue>org.netbeans.core.ui/1 &gt; 1.0</explicitValue>
                         </dependency>
-                    </moduleDependencies>
+                    </moduleDependencies>-->
                 </configuration>
             </plugin>
             <plugin>
