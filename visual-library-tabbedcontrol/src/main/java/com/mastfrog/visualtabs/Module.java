@@ -19,7 +19,11 @@
 package com.mastfrog.visualtabs;
 
 import java.awt.EventQueue;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.UIManager;
 import static org.netbeans.swing.tabcontrol.TabDisplayer.EDITOR_TAB_DISPLAYER_UI_CLASS_ID;
 import org.openide.modules.ModuleInstall;
@@ -31,11 +35,25 @@ import org.openide.modules.ModuleInstall;
  */
 public class Module extends ModuleInstall {
 
-    static final String VALUE = "com.mastfrog.visualtabls.VisualTabDisplayerUI";
-    static final PropertyChangeListener PCL = evt -> {
-        if (evt != null && EDITOR_TAB_DISPLAYER_UI_CLASS_ID.equals(evt.getPropertyName()))  {
-            if (!VALUE.equals(evt.getNewValue())) {
-                init();
+    private static final Logger LOG = Logger.getLogger(Module.class.getName());
+
+    static final String VALUE = "com.mastfrog.visualtabs.VisualTabDisplayerUI";
+
+    static final PropertyChangeListener PCL = new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (evt != null && EDITOR_TAB_DISPLAYER_UI_CLASS_ID.equals(evt.getPropertyName())) {
+                LOG.log(Level.INFO, "VisualTabs-Renit for prop change {0} -> {1}", new Object[]{evt.getOldValue(), evt.getNewValue()});
+                if (!VALUE.equals(evt.getNewValue())) {
+                    init();
+                }
+            } else if (evt != null && "lookAndFeel".equals(evt.getPropertyName())) {
+                EventQueue.invokeLater(() -> {
+                    PropertyChangeListener[] old = UIManager.getDefaults().getPropertyChangeListeners();
+                    if (old == null || old.length == 0 || !Arrays.asList(old).contains(this)) {
+                        UIManager.getDefaults().addPropertyChangeListener(this);
+                    }
+                });
             }
         }
     };
@@ -54,6 +72,7 @@ public class Module extends ModuleInstall {
     }
 
     static void init() {
+        LOG.log(Level.INFO, "VisualTabs-Init");
         UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VALUE);
     }
 }
