@@ -20,10 +20,7 @@ package com.mastfrog.visualtabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
@@ -42,22 +39,12 @@ import java.awt.event.MouseMotionListener;
 import java.util.EventObject;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultSingleSelectionModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ComponentUI;
-import org.netbeans.swing.tabcontrol.DefaultTabDataModel;
-import org.netbeans.swing.tabcontrol.TabData;
 import org.netbeans.swing.tabcontrol.TabDisplayer;
-import static org.netbeans.swing.tabcontrol.TabDisplayer.EDITOR_TAB_DISPLAYER_UI_CLASS_ID;
 import org.netbeans.swing.tabcontrol.TabDisplayerUI;
 import org.netbeans.swing.tabcontrol.TabbedContainer;
 import org.netbeans.swing.tabcontrol.event.TabActionEvent;
@@ -324,6 +311,7 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         return result;
     }
 
+    /*
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
 
 //        System.setProperty("nb.forceui", "Aqua");
@@ -358,7 +346,7 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
             mdl.addTab(1, new TabData(lbl("t"), icon, "Snazzle.java", "Snazzle"));
 
             TabbedContainer disp = new TabbedContainer(mdl, TabDisplayer.TYPE_EDITOR);
-
+            
             disp.setActive(true);
 
             disp.getSelectionModel().setSelectedIndex(0);
@@ -411,4 +399,5 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         }
         return null;
     }
+     */
 }

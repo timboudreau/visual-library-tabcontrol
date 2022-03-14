@@ -21,7 +21,6 @@ package com.mastfrog.visualtabs;
 import com.mastfrog.visualtabs.TabsAppearance.TabIcon;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;

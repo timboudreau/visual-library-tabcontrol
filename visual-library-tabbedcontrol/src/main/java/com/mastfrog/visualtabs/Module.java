@@ -45,7 +45,7 @@ public class Module extends ModuleInstall {
             if (evt != null && EDITOR_TAB_DISPLAYER_UI_CLASS_ID.equals(evt.getPropertyName())) {
                 LOG.log(Level.INFO, "VisualTabs-Renit for prop change {0} -> {1}", new Object[]{evt.getOldValue(), evt.getNewValue()});
                 if (!VALUE.equals(evt.getNewValue())) {
-                    init();
+                    EventQueue.invokeLater(Module::init);
                 }
             } else if (evt != null && "lookAndFeel".equals(evt.getPropertyName())) {
                 EventQueue.invokeLater(() -> {
@@ -74,5 +74,6 @@ public class Module extends ModuleInstall {
     static void init() {
         LOG.log(Level.INFO, "VisualTabs-Init");
         UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VALUE);
+        System.out.println("VT INIT");
     }
 }

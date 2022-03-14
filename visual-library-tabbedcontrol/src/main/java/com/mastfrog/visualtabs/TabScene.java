@@ -21,15 +21,11 @@ package com.mastfrog.visualtabs;
 import com.mastfrog.visualtabs.buttons.ButtonsPanel;
 import com.mastfrog.visualtabs.PanTray.DragScrollTimer;
 import com.mastfrog.visualtabs.buttons.ButtonAction;
-import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
 import java.awt.AWTEvent;
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -48,24 +44,16 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
-import javax.swing.DefaultSingleSelectionModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.LookAndFeel;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.HoverProvider;
 import org.netbeans.api.visual.action.MoveProvider;
@@ -81,7 +69,6 @@ import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
-import org.netbeans.swing.tabcontrol.DefaultTabDataModel;
 import org.netbeans.swing.tabcontrol.TabData;
 import org.netbeans.swing.tabcontrol.TabDataModel;
 import org.netbeans.swing.tabcontrol.TabDisplayer;
@@ -89,7 +76,6 @@ import org.netbeans.swing.tabcontrol.TabDisplayerUI;
 import org.netbeans.swing.tabcontrol.TabListPopupAction;
 import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import org.netbeans.swing.tabcontrol.event.TabActionEvent;
-import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 
@@ -99,6 +85,7 @@ import org.openide.util.RequestProcessor;
  */
 public class TabScene extends Scene {
 
+    private static final Logger LOG = Logger.getLogger(TabScene.class.getName());
     final TabsAppearance appearance;
 
     private final TabDataModel model;
@@ -389,7 +376,6 @@ public class TabScene extends Scene {
 
         @Override
         public void layout(Widget widget) {
-//            System.out.println("Layout");
             Rectangle dummy = new Rectangle(0, 0, 24, 24);
             panTray.resolveBounds(null, dummy);
             raggedEdges.resolveBounds(null, dummy);
@@ -619,10 +605,19 @@ public class TabScene extends Scene {
 
     private final SelectionChangeListener selectionListener = new SelectionChangeListener();
 
-    class SelectionChangeListener implements ChangeListener {
+    private static final long STARTUP = System.currentTimeMillis();
+
+    private static long elapsedSinceStartup() {
+        return System.currentTimeMillis() - STARTUP;
+    }
+
+    class SelectionChangeListener implements ChangeListener, Runnable {
 
         private int lastIndex = -1;
         private TabData lastSelectedData;
+        private long lastChanged = System.currentTimeMillis();
+        private RequestProcessor.Task delayedRefresh = RequestProcessor.getDefault().create(this);
+        private int changes;
 
         void init() {
             lastIndex = selection.getSelectedIndex();
@@ -633,12 +628,41 @@ public class TabScene extends Scene {
             }
         }
 
+        long elapsed() {
+            long now = System.currentTimeMillis();
+            long lc = lastChanged;
+            lastChanged = now;
+            return now - lc;
+        }
+
         @Override
         public void stateChanged(ChangeEvent e) {
+            int change = changes++;
+            if (change == 0 & elapsedSinceStartup() < 45000) {
+                LOG.log(Level.FINE, "Defer initial tab change 2 seconds");
+                task.schedule(2000);
+            } else if (elapsed() < 200) {
+                LOG.log(Level.FINER, "Many tab changes, reschedule in 500ms");
+                task.schedule(500);
+            } else {
+                LOG.log(Level.FINEST, "Run tab state change immediately");
+                run();
+            }
+        }
+
+        @Override
+        public void run() {
+            if (!EventQueue.isDispatchThread()) {
+                EventQueue.invokeLater(this);
+                return;
+            }
             boolean changed = false;
             int index = selection.getSelectedIndex();
+            long ela = elapsed();
+            LOG.log(Level.FINE, "{0}: SEL CHANGE -> index {1}", new Object[]{ela, index});
             if (index < 0) {
                 TabData old = lastSelectedData;
+                LOG.log(Level.FINE, "Negative index from {0}", old);
                 lastSelectedData = null;
                 lastIndex = -1;
                 if (old != null) {
@@ -651,10 +675,15 @@ public class TabScene extends Scene {
             } else {
                 TabData old = lastSelectedData;
                 TabData data = model.getTab(index);
+
+                LOG.log(Level.FINE, "{0}: select from {1} to {2}",
+                        new Object[]{ela, old == null ? -1 : model.indexOf(old), index});
+
                 lastSelectedData = data;
                 if (old != null) {
                     TabWidget previouslySelected = widgetFor(old);
                     if (previouslySelected != null && previouslySelected.getState().isSelected()) {
+                        LOG.log(Level.FINEST, "{0}:  remove dep from prev", ela);
                         previouslySelected.removeDependency(glowDependency);
                         previouslySelected.setState(previouslySelected.getState().deriveSelected(false));
                         previouslySelected.revalidate();
@@ -662,6 +691,7 @@ public class TabScene extends Scene {
                     }
                 }
                 TabWidget newlySelected = widgetFor(data);
+                LOG.log(Level.FINEST, "{0}: new sel {1}", new Object[]{ela, data});
                 if (newlySelected != null) {
                     newlySelected.addDependency(glowDependency);
                     newlySelected.setState(newlySelected.getState().deriveSelected(true));
@@ -670,6 +700,22 @@ public class TabScene extends Scene {
                     panTray.ensureChildVisible(newlySelected);
                     ensureSelectedWidget(newlySelected);
                     changed = true;
+                    if (data != old) {
+                        Component comp = data.getComponent();
+                        if (comp != null) {
+                            EventQueue.invokeLater(() -> {
+                                if (comp.isDisplayable()) {
+                                    LOG.log(Level.FINEST, "{0}:  send focus to it", ela);
+                                    comp.requestFocusInWindow();
+                                } else {
+                                    LOG.log(Level.FINEST, ela + ":  not displayable, can't send focus");
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    LOG.log(Level.WARNING, "don''t have a widget for {0} with {1}",
+                            new Object[]{data, index});
                 }
             }
             lastIndex = index;
@@ -1205,7 +1251,6 @@ public class TabScene extends Scene {
             }
             Point xlated = new Point(origDragPoint);
             int distance = (originalLocation.x - suggestedLocation.x);
-//            System.out.println("DISTANCE " + distance);
             xlated.x -= distance;
             xlated.y = origDragPoint.y;
 
@@ -1473,7 +1518,7 @@ public class TabScene extends Scene {
     public boolean isActive() {
         return active;
     }
-
+    /*
     static class TestIcon implements Icon {
 
         @Override
@@ -1587,7 +1632,7 @@ public class TabScene extends Scene {
 
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
-            ((Graphics2D)g).setStroke(new BasicStroke(0.5F));
+            ((Graphics2D) g).setStroke(new BasicStroke(0.5F));
             g.setColor(Color.orange);
             g.fillRect(x + 1, y, 11, 14);
             g.setColor(Color.black);
@@ -1604,6 +1649,7 @@ public class TabScene extends Scene {
             return 16;
         }
     }
+
     public static class DarkNimbusLookAndFeel extends NimbusLookAndFeel {
 
         @Override
@@ -1767,4 +1813,5 @@ public class TabScene extends Scene {
             }
         }
     }
+     */
 }
