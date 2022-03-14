@@ -205,9 +205,6 @@ public class TabsAppearance {
                     selectedHl.invertRGB()
                             .withSaturationNoGreaterThan(0.25f)
                             .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
-                            //baseColor.contrasting()
-                            //            = Colors.fromUIManager(textFallback,
-                            //                    "controlText", "textText", "textInactiveText")
                             .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
                             ), selectedHl).cache();
 
