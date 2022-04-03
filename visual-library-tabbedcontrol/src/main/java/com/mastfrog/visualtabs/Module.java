@@ -74,6 +74,5 @@ public class Module extends ModuleInstall {
     static void init() {
         LOG.log(Level.INFO, "VisualTabs-Init");
         UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VALUE);
-        System.out.println("VT INIT");
     }
 }

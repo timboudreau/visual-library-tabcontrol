@@ -19,7 +19,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-    <version>0.5.10</version>
+    <version>0.5.11</version>
     <packaging>pom</packaging>
     <name>Visual Library Tabbed Control Parent</name>
     <modules>
@@ -30,7 +30,7 @@ under the License.
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <netbeans.version>RELEASE126</netbeans.version>
-        <junit.version>5.7.0</junit.version>
+        <junit.version>5.8.0</junit.version>
         <darcula.version>2018.2</darcula.version>
         <mastfrog.version>2.8.0</mastfrog.version>
     </properties>

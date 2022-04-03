@@ -153,7 +153,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
         int sz = model.size();
         boolean modelSizeChanged = sz < widgets.size();
         List<TabData> newSnapshot = new ArrayList<>(model.getTabs());
-        LOG.log(Level.INFO, "Sync model:tabs {0} size {1} old sel {2}",
+        LOG.log(Level.FINE, "Sync model:tabs {0} size {1} old sel {2}",
                 new Object[]{modelSizeChanged ? "size-change" : "no-size-change",
                     sz, oldSelection});
 
@@ -161,7 +161,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
             for (int i = sz; i < widgets.size(); i++) {
                 remover.accept(widgets.get(i));
             }
-            LOG.log(Level.INFO, "remove range {0} - {1}", new Object[]{sz, widgets.size()});
+            LOG.log(Level.FINER, "remove range {0} - {1}", new Object[]{sz, widgets.size()});
             widgets.removeRange(sz, widgets.size());
         } else if (sz > widgets.size()) {
             modelSizeChanged = true;
@@ -193,7 +193,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
                     newSelIndex = model.size() - 1;
                 }
             }
-            LOG.log(Level.INFO, "New selected index {0}", newSelIndex);
+            LOG.log(Level.FINER, "New selected index {0}", newSelIndex);
             if (newSelIndex >= 0) {
                 if (newSelIndex != oldSelection) {
                     sel.setSelectedIndex(newSelIndex);
@@ -210,7 +210,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
 //                                    ? ((TopComponent) c).getDisplayName()
 //                                    : c.getName() == null
 //                                    ? c.toString() : c.getName();
-                            LOG.log(Level.INFO, "Send focus to {0}", name);
+                            LOG.log(Level.FINER, "Send focus to {0}", name);
                             c.requestFocusInWindow();
                         }
                     }
@@ -235,7 +235,7 @@ final class TabWidgetMapper implements ComplexListDataListener, Iterable<TabWidg
 //        }
         if (oldSelectedWidget == null && newSnapshot.size() > 0) {
             int last = model.size() - 1;
-            LOG.log(Level.INFO, "  move selection to {0}", last);
+            LOG.log(Level.FINER, "  move selection to {0}", last);
             if (last >= 0) { // this can race
                 TabWidget toSelect = widgets.get(last);
                 sel.setSelectedIndex(last);
