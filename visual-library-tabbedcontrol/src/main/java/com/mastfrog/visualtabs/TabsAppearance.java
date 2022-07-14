@@ -69,7 +69,7 @@ public class TabsAppearance {
     private static final Color hlDark = new Color(20, 10, 80);
 
     static Boolean dark;
-    static BooleanSupplier isDark = (() -> {
+    static final BooleanSupplier isDark = (() -> {
         if (dark != null) {
             return dark;
         }
@@ -117,7 +117,7 @@ public class TabsAppearance {
             ).darkenOrLighten(0.325f, isDark)
                     .withSaturationNoGreaterThan(0.425F)
                     //                    .withSaturationNoGreaterThan(0.275f)
-                    .withBrightnessFrom(Colors.fromUIManager(Color.GRAY, "control"))
+                    .withBrightnessFrom(Colors.fromUIManager(Color.GRAY, "control").increaseSaturationBy(0.15F).darkenBy(0.15F))
                     .unless(isDark, Colors.fromUIManager(ltBlue)).cache();
 
     static final ColorSupplier selectedHl
@@ -146,14 +146,16 @@ public class TabsAppearance {
                     .adjustSaturation(-0.35f, isDark)
                     .cache();
 
-    static ColorSupplier baseColor
+    static final ColorSupplier baseColor
             = Colors.fromUIManager(hl, TAB_UNSEL_FILL_BRIGHT_UPPER,
                     TAB_UNSEL_FILL_DARK_UPPER, TAB_UNSELECTED_FILL_DARK, "control")
-                    .darkenOrLighten(0.125f, isDark)
+                    .darkenOrLighten(0.0675f, isDark)
+                    .increaseSaturationBy(0.15F)
                     .cache();
 
 //    static ColorSupplier baseHl = Colors.fromUIManager(base, "control").darkenBy(0.25f);
-    static ColorSupplier baseHl = baseColor.darkenOrLighten(0.1275F, () -> !isDark.getAsBoolean()).cache();
+    static final ColorSupplier baseHl = 
+            baseColor.darkenOrLighten(0.1275F, () -> !isDark.getAsBoolean()).cache();
     ;
 
     private static final ColorSupplier miniHighlight
@@ -168,18 +170,19 @@ public class TabsAppearance {
             //            = selectedBase.withBrightnessFrom(selectedHl.invertRGB())
             //                .withSaturationNoGreaterThan(0.25f)
             = miniHighlight.darkerOf(selectedBase).perceptuallyContrasting()
-                    .withSaturationNoGreaterThan(0.25f).cache();
+                    .withSaturationNoGreaterThan(0.25f)
+                    .unless(() -> !isDark.getAsBoolean(), selectedHl.perceptuallyContrasting())
+                    .cache();
     ;
 
     private Supplier<Color> background = Colors.fromUIManager(Color.GRAY, "control");
 
-    private static ColorSupplier defaultGlowDark
+    private static final ColorSupplier defaultGlowDark
             = selectedHl.withSaturation(0.475f)
                     .withBrightness(0.98f)
                     .withAlpha(167)
                     .cache()
                     .unless(isDark, Colors.fixed(new Color(120, 120, 225, 172))).cache();
-    ;
 
     private Supplier<Color> glowDark = defaultGlowDark;
 
@@ -191,7 +194,7 @@ public class TabsAppearance {
 
     private Supplier<Color> glowLight
             = Colors.fixed(WHITE_FULL_ALPHA).unless(isDark, Colors.toUIColorSupplier(background).withAlpha(0)).cache();
-    ;
+
     private static final ColorSupplier directionFallback
             = Colors.toUIColorSupplier(defaultGlowDark.withSaturation(0.9f)).withAlpha(0).cache();
 
@@ -199,17 +202,19 @@ public class TabsAppearance {
     private BackgroundPainter selectedTabPainter = TabsAppearance::defaultPaintSelected;
     private BackgroundPainter unselectedTabPainter = TabsAppearance::defaultPaintUnselected;
 
-    private static ColorSupplier textFallback = Colors.fixed(Color.BLACK).unless(isDark, Colors.fixed(Color.WHITE));
-    private static ColorSupplier defaultUnselectedForeground
+    private static final ColorSupplier textFallback = Colors.fixed(Color.BLACK).unless(isDark, Colors.fixed(Color.WHITE));
+    private static final ColorSupplier defaultUnselectedForeground
             = new CenterRepulsion(
-                    selectedHl.invertRGB()
-                            .withSaturationNoGreaterThan(0.25f)
+                    baseColor.perceptuallyContrasting()
+//                            .withSaturationNoGreaterThan(0.25f)
                             .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
                             .unless(isDark, baseHl.perceptuallyContrasting().withBrightnessNoGreaterThan(0.875f)
                             ), selectedHl).cache();
 
-    private static ColorSupplier defaultHoveredForeground
-            = hoveredHl.invertRGB().withSaturationNoGreaterThan(0.25F).cache();
+    private static final ColorSupplier defaultHoveredForeground
+            = hoveredHl.invertRGB().withSaturationNoGreaterThan(0.25F)
+                    .unless(isDark, hoveredHl.withSaturationNoGreaterThan(0.35F).brightenBy(0.15F))
+                    .cache();
     ;
 //
     private Function<ObjectState, Paint> tabForeground = state -> {
