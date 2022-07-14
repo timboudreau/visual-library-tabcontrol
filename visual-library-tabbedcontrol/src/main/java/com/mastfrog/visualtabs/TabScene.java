@@ -22,13 +22,10 @@ import com.mastfrog.visualtabs.buttons.ButtonsPanel;
 import com.mastfrog.visualtabs.PanTray.DragScrollTimer;
 import com.mastfrog.visualtabs.buttons.ButtonAction;
 import java.awt.AWTEvent;
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -50,23 +47,13 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
-import javax.swing.DefaultSingleSelectionModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.LookAndFeel;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.HoverProvider;
 import org.netbeans.api.visual.action.MoveProvider;
@@ -82,7 +69,6 @@ import org.netbeans.api.visual.layout.LayoutFactory;
 import org.netbeans.api.visual.widget.LayerWidget;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.Widget;
-import org.netbeans.swing.tabcontrol.DefaultTabDataModel;
 import org.netbeans.swing.tabcontrol.TabData;
 import org.netbeans.swing.tabcontrol.TabDataModel;
 import org.netbeans.swing.tabcontrol.TabDisplayer;
@@ -90,7 +76,6 @@ import org.netbeans.swing.tabcontrol.TabDisplayerUI;
 import org.netbeans.swing.tabcontrol.TabListPopupAction;
 import org.netbeans.swing.tabcontrol.customtabs.Tabbed;
 import org.netbeans.swing.tabcontrol.event.TabActionEvent;
-import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.RequestProcessor;
 
@@ -1533,7 +1518,7 @@ public class TabScene extends Scene {
     public boolean isActive() {
         return active;
     }
-    
+    /*
     static class TestIcon implements Icon {
 
         @Override
@@ -1828,4 +1813,5 @@ public class TabScene extends Scene {
             }
         }
     }
+    */
 }
