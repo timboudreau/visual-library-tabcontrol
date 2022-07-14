@@ -87,12 +87,13 @@ class PanTray extends Widget {
     private static final long RAPID = 55;
     private static final int TRIGGER_RAPID_COUNT = 4;
     private static final int RAPID_MULTIPLIER = 25;
+    static boolean MAC = System.getProperty("os.name", "-").contains("Mac OS");
 
     private void mouseWheelMoved(WidgetAction.WidgetMouseWheelEvent event) {
         long now = System.currentTimeMillis();
         // Wheel numbers are low, so to not have deathly slow scrolling
         // we need a multiplier
-        int multiplier = 5;
+        int multiplier = MAC ? 45 : 5; // XXX why?
         // We will accelerate if we see more than some number of events
         // in a short timeframe
         long interval = now - lastScrollEvent;

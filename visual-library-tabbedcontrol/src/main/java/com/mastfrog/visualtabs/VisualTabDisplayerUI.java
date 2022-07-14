@@ -310,16 +310,17 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         result.setBackground(Color.GRAY);
         return result;
     }
-
-    /*
+/*
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
 
-//        System.setProperty("nb.forceui", "Aqua");
+        System.setProperty("nb.forceui", "Aqua");
 //        org.netbeans.swing.plaf.Startup.run(com.bulenkov.darcula.DarculaLaf.class, 18, null);
 //        org.netbeans.swing.plaf.Startup.run(com.sun.java.swing.plaf.gtk.GTKLookAndFeel.class, 18, null);
 //        org.netbeans.swing.plaf.Startup.run(javax.swing.plaf.nimbus.NimbusLookAndFeel.class, 21, null);
 //        org.netbeans.swing.plaf.Startup.run(com.sun.java.swing.plaf.motif.MotifLookAndFeel.class, 18, null);
 //        org.netbeans.swing.plaf.Startup.run(javax.swing.plaf.metal.MetalLookAndFeel.class, 18, null);
+//        org.netbeans.swing.plaf.Startup.run(DarkNimbusLookAndFeel.class, 18, null);
+    
         UIManager.put(EDITOR_TAB_DISPLAYER_UI_CLASS_ID, VisualTabDisplayerUI.class.getName());
         EventQueue.invokeLater(() -> {
 
@@ -399,5 +400,5 @@ public class VisualTabDisplayerUI extends TabDisplayerUI {
         }
         return null;
     }
-     */
+*/
 }
