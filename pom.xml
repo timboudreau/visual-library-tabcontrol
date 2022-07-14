@@ -39,7 +39,7 @@ under the License.
             <dependency>
                 <groupId>com.mastfrog</groupId>
                 <artifactId>colors</artifactId>
-                <version>${mastfrog.version}.3</version>
+                <version>${mastfrog.version}.4</version>
             </dependency>
             <dependency>
                 <groupId>org.netbeans.api</groupId>
