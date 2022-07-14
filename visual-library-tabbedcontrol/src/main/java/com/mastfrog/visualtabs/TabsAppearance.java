@@ -167,7 +167,7 @@ public class TabsAppearance {
     static ColorSupplier selectedForeground
             //            = selectedBase.withBrightnessFrom(selectedHl.invertRGB())
             //                .withSaturationNoGreaterThan(0.25f)
-            = miniHighlight.darkerOf(selectedBase).contrasting()
+            = miniHighlight.darkerOf(selectedBase).perceptuallyContrasting()
                     .withSaturationNoGreaterThan(0.25f).cache();
     ;
 
@@ -205,7 +205,7 @@ public class TabsAppearance {
                     selectedHl.invertRGB()
                             .withSaturationNoGreaterThan(0.25f)
                             .withBrightnessFrom(Colors.fromUIManager(textFallback, "controlText", "textText"))
-                            .unless(isDark, baseHl.contrasting().withBrightnessNoGreaterThan(0.875f)
+                            .unless(isDark, baseHl.perceptuallyContrasting().withBrightnessNoGreaterThan(0.875f)
                             ), selectedHl).cache();
 
     private static ColorSupplier defaultHoveredForeground

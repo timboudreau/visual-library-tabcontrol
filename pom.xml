@@ -19,7 +19,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-    <version>0.5.11</version>
+    <version>0.5.12</version>
     <packaging>pom</packaging>
     <name>Visual Library Tabbed Control Parent</name>
     <modules>
@@ -30,16 +30,16 @@ under the License.
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <netbeans.version>RELEASE126</netbeans.version>
-        <junit.version>5.8.0</junit.version>
+        <junit.version>5.8.2</junit.version>
         <darcula.version>2018.2</darcula.version>
-        <mastfrog.version>2.8.0</mastfrog.version>
+        <mastfrog.version>2.8.3</mastfrog.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.mastfrog</groupId>
                 <artifactId>colors</artifactId>
-                <version>${mastfrog.version}</version>
+                <version>${mastfrog.version}.3</version>
             </dependency>
             <dependency>
                 <groupId>org.netbeans.api</groupId>
@@ -121,7 +121,7 @@ under the License.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>3.10.1</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -138,7 +138,7 @@ under the License.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.0.0-M7</version>
                     <configuration>
                         <!--
                             Torture maven into actually displaying test output in
@@ -157,7 +157,7 @@ under the License.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.4.0</version>
                     <configuration>
                         <quiet>true</quiet>
                         <doclint>none</doclint>
@@ -172,24 +172,11 @@ under the License.
             <name>NetBeans</name>
             <url>http://bits.netbeans.org/maven2/</url>
             <releases>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
                 <updatePolicy>never</updatePolicy>
             </releases>
             <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>timboudreau-builds</id>
-            <name>timboudreau.com builds</name>
-            <url>https://timboudreau.com/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
