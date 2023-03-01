@@ -20,7 +20,7 @@ under the License.
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>visual-library-tabbedcontrol-parent</artifactId>
-        <version>0.5.13</version>
+        <version>0.5.14</version>
     </parent>
     <artifactId>visual-library-tabbedcontrol</artifactId>
     <packaging>nbm</packaging>

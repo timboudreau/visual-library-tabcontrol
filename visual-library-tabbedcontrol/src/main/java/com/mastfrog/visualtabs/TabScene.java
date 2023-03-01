@@ -716,6 +716,8 @@ public class TabScene extends Scene {
                 } else {
                     LOG.log(Level.WARNING, "don''t have a widget for {0} with {1}",
                             new Object[]{data, index});
+                    changed = true;
+                    revalidate();
                 }
             }
             lastIndex = index;
